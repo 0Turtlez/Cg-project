@@ -1,0 +1,47 @@
+# --- Compiled Binaries & Libraries ---
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.dll
+*.exe
+*.out
+*.app
+
+# --- CMake ---
+# Ignore the entire build directory (standard practice)
+build/
+Build/
+cmake-build-*/
+out/
+
+# If you run cmake in the root (not recommended), ignore these:
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+
+# --- CLion (JetBrains) ---
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+# --- Visual Studio Code ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Dependency Managers ---
+vcpkg_installed/
+.conan/
