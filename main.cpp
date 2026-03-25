@@ -157,14 +157,18 @@ void Ground(Point pos)
 struct FerrisWheel {
     Point center;
     float radius;
-    float position;
     float rotation;
 
     int numCars;
     Color color;
 
     FerrisWheel(Point _p, float _r, int _cars, Color _c) :
-        center(_p), radius(_r), numCars(_cars), color(_c) {}
+        center(_p),
+        radius(_r),
+        numCars(_cars),
+        color(_c),
+        rotation(0.0f)
+    {}
 
     void rotate(float speed) {
         rotation += speed;
@@ -199,7 +203,8 @@ void drawFerris(FerrisWheel &fw) {
 FerrisWheel ferris(NewPos(0, 0), 300.0f, 8, BLUE);
 
 void animateFerris() {
-    ferris.rotate(1.0f);
+    // TODO: uncomment this after first submission
+    // ferris.rotate(1.0f);
 }
 
 // ------ Display Function --> Represent Draw Order ------ //
