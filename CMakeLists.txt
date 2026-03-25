@@ -11,5 +11,5 @@ add_executable(cgproject main.cpp)
 
 target_link_libraries(cgproject PRIVATE
     GLUT::GLUT
-        OpenGL::GL
+    OpenGL::GL
 )
