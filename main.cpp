@@ -1,3 +1,4 @@
+// Test comment - DELETE THIS
 #include <cstdlib>
 #include <vector>
 #include <math.h>
@@ -5,6 +6,7 @@
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
+#include <GL/glew.h>
 
 #else
 #include <GL/glut.h>
@@ -253,6 +255,12 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(screenWidth, screenHeight);
     glutCreateWindow("Ferris Wheel");
+
+    // Initialize GLEW
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        return -1;
+    }
 
     // Run Graphics
     init();
