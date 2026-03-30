@@ -1,4 +1,3 @@
-// Test comment - DELETE THIS
 #include <cstdlib>
 #include <vector>
 #include <math.h>
@@ -35,7 +34,7 @@ struct Color
     float a;
 };
 
-struct RecSize // Rectangle Size Struct
+struct QuadSize // Quad Size Struct
 {
     Point upperLeft;
     Point upperRight;
@@ -73,27 +72,27 @@ Color NewColor(float r, float g, float b, float a = 1.0)
     return color;
 }
 
-RecSize newRecSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point upperRight)
+QuadSize newQuadSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point upperRight)
 {
-    RecSize recSize;
-    recSize.lowerLeft = lowerLeft;
-    recSize.lowerRight = lowerRight;
-    recSize.upperLeft = upperLeft;
-    recSize.upperRight = upperRight;
-    return recSize;
+    QuadSize quadSize;
+    quadSize.lowerLeft = lowerLeft;
+    quadSize.lowerRight = lowerRight;
+    quadSize.upperLeft = upperLeft;
+    quadSize.upperRight = upperRight;
+    return quadSize;
 }
 
 // ------------------- Shape Drawing Functionalities ------------------ //
 
 // Draws Basic Shapes --> Equal sides
-void drawBasicShape(Point pos, float radius, int lines, Color color = WHITE)
+void drawBasicShape(Point pos, float radius, int lines, Color color = WHITE, float fillPercentage = 1.0f)
 {
     glBegin(GL_POLYGON);
 
-    glColor4f(color.r, color.g, color.b, color.a);  // Purple
+    glColor4f(color.r, color.g, color.b, color.a);
 
     // Generate points around the circle
-    for (int i = 0; i < lines; i++)
+    for (int i = 0; i < (lines * fillPercentage); i++)
     {
         // theta goes from 0 to 2PI in steps
         float theta = 2.0f * (float)PI * (float)i / (float)lines;
@@ -109,8 +108,32 @@ void drawBasicShape(Point pos, float radius, int lines, Color color = WHITE)
     glEnd();
 }
 
-// Draw Rectangle of desired size
-void drawRectangle(RecSize size, Color color = WHITE)
+// Draws Curved Line
+void drawCurvedLine(Point pos, float radius, int lines, Color color = WHITE, float fillPercentage = 0.5f)
+{
+    glBegin(GL_LINE_STRIP);
+
+    glColor4f(color.r, color.g, color.b, color.a);
+
+    // Generate points around the circle
+    for (int i = 0; i < (lines * fillPercentage); i++)
+    {
+        // theta goes from 0 to 2PI in steps
+        float theta = 2.0f * (float)PI * (float)i / (float)lines;
+
+        // Parametric circle equation
+        float x = radius * cosf(theta);
+        float y = radius * sinf(theta);
+
+        // Place the circle lower by subtracting 0.6 from y
+        glVertex2f(x + pos.x, y + pos.y);
+    }
+
+    glEnd();
+}
+
+// Draw Quad of desired size
+void drawQuad(QuadSize size, Color color = WHITE)
 {
     glBegin(GL_QUADS);
     glColor4f(color.r, color.g, color.b, color.a);
@@ -140,6 +163,8 @@ void CreateCloud(Point pos)
     drawBasicShape(rightCirclePos, radius, lines);
     drawBasicShape(topCirclePos, radius, lines);
     drawBasicShape(bottomCirclePos, radius, lines);
+
+    drawCurvedLine(NewPos(0,0), radius, lines);
 }
 
 void Ground(Point pos)
@@ -149,9 +174,9 @@ void Ground(Point pos)
     Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 200);
     Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 200);
 
-    RecSize recSize = newRecSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
-    drawRectangle(recSize, GREEN);
+    drawQuad(quadSize, GREEN);
 }
 
 
@@ -170,7 +195,8 @@ struct FerrisWheel {
         numCars(_cars),
         color(_c),
         rotation(0.0f)
-    {}
+    {
+    }
 
     void rotate(float speed) {
         rotation += speed;
@@ -179,22 +205,22 @@ struct FerrisWheel {
 };
 
 // TODO: Isolate cars and Wheel draw
-void drawFerris(FerrisWheel &fw) {
+void drawFerris(FerrisWheel& fw) {
     // Draw Wheel
     drawBasicShape(fw.center, fw.radius, 100, fw.color);
     drawBasicShape(fw.center, 290, 30, WHITE);
 
     // Draw spokes and cars
     for (int i = 0; i < fw.numCars; i++) {
-        float angle = (2.0f *  PI * i / fw.numCars) + (fw.rotation * PI / 180.0f);
+        float angle = (2.0f * PI * i / fw.numCars) + (fw.rotation * PI / 180.0f);
 
         float carX = fw.center.x + fw.radius * cos(angle);
         float carY = fw.center.y + fw.radius * sin(angle);
 
         glBegin(GL_LINES);
-            glColor4f(BLACK.r, BLACK.g, BLACK.b, 1.0);
-            glVertex2f(fw.center.x, fw.center.y);
-            glVertex2f(carX, carY);
+        glColor4f(BLACK.r, BLACK.g, BLACK.b, 1.0);
+        glVertex2f(fw.center.x, fw.center.y);
+        glVertex2f(carX, carY);
         glEnd();
 
         drawBasicShape(NewPos(carX, carY), 30, 4, RED);
@@ -215,8 +241,10 @@ void display() {
 
     // Create Ground
     Ground(NewPos(0, -520));
+
     //Ferris Wheel
     drawFerris(ferris);
+
     // Create Clouds
     CreateCloud(NewPos(700, 400));
     CreateCloud(NewPos(-600, 500));
