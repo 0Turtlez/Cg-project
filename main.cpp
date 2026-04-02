@@ -33,7 +33,7 @@ struct Color
     float a;
 };
 
-struct RecSize // Rectangle Size Struct
+struct QuadSize // Quad Size Struct
 {
     Point upperLeft;
     Point upperRight;
@@ -44,8 +44,6 @@ struct TriSize {
     Point top;
     Point bottomRight;
     Point bottomLeft;
-
-
 };
 
 // -------- Universally Defined Colors ------------- //
@@ -55,6 +53,7 @@ const Color BLACK = { 0.0f, 0.0f, 0.0f };
 const Color RED = { 1.0f, 0.0f, 0.0f };
 const Color BLUE = { 0.0f, 0.0f, 1.0f };
 const Color GREEN = { 0.0f, 1.0f, 0.0f };
+const Color YELLOW = { 1.0f, 1.0f, 0.0f };
 const Color BROWN = { 0.8745f , 0.6705f , 0.3764f };
 const Color DBROWN = { 0.431f ,0.176 ,0.050 };
 const Color DGREEN = { 0.2823f , .5882f , 0.2941f };
@@ -80,15 +79,15 @@ Color NewColor(float r, float g, float b, float a = 1.0)
     return color;
 }
 
-RecSize newRecSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point upperRight)
+QuadSize newQuadSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point upperRight)
 {
-    RecSize recSize;
-    recSize.lowerLeft = lowerLeft;
-    recSize.lowerRight = lowerRight;
-    recSize.upperLeft = upperLeft;
-    recSize.upperRight = upperRight;
+    QuadSize quadSize;
+    quadSize.lowerLeft = lowerLeft;
+    quadSize.lowerRight = lowerRight;
+    quadSize.upperLeft = upperLeft;
+    quadSize.upperRight = upperRight;
 
-    return recSize;
+    return quadSize;
 }
 TriSize newTriSize(Point top, Point bottomRight, Point bottomLeft) {
     TriSize triSize;
@@ -124,8 +123,8 @@ void drawBasicShape(Point pos, float radius, int lines, Color color = WHITE)
     glEnd();
 }
 
-// Draw Rectangle of desired size
-void drawRectangle(RecSize size, Color color = WHITE)
+// Draw Quad of desired size
+void drawQuad(QuadSize size, Color color = WHITE)
 {
     glBegin(GL_QUADS);
     glColor4f(color.r, color.g, color.b, color.a);
@@ -156,6 +155,7 @@ void CreateCloud(Point pos)
     drawBasicShape(topCirclePos, radius, lines);
     drawBasicShape(bottomCirclePos, radius, lines);
 }
+
 void CreateTree(Point pos)
 {
     // Commonality variable
@@ -178,9 +178,10 @@ void CreateTree(Point pos)
     Point upperRight = NewPos(pos.x - 50, pos.y - 125);
     Point lowerLeft = NewPos(pos.x + 50, pos.y - 370);
     Point lowerRight = NewPos(pos.x - 50, pos.y - 370);
-    RecSize recSize = newRecSize(lowerLeft, lowerRight, upperLeft, upperRight);
-    drawRectangle(recSize, DBROWN);
+    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    drawQuad(quadSize, DBROWN);
 }
+
 void drawTriangle(TriSize size, Color color = WHITE) {
     // Start describing a primitive where each group of 3 vertices is a triangle
     glBegin(GL_TRIANGLES);
@@ -211,9 +212,9 @@ void Ground(Point pos)
     Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 200);
     Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 200);
 
-    RecSize recSize = newRecSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
-    drawRectangle(recSize, GREEN);
+    drawQuad(quadSize, GREEN);
 }
 
 
@@ -222,8 +223,8 @@ void Pickets(Point pos) {
     Point upperRight = NewPos(pos.x - 30, pos.y + 100);
     Point lowerLeft = NewPos(pos.x + 30, pos.y - 100);
     Point lowerRight = NewPos(pos.x - 30, pos.y - 100);
-    RecSize recSize = newRecSize(lowerLeft, lowerRight, upperLeft, upperRight);
-    drawRectangle(recSize, BROWN);
+    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    drawQuad(quadSize, BROWN);
     Point top = NewPos(pos.x + 0, pos.y + 120);
     Point bottomRight = NewPos(pos.x - 30, pos.y + 100);
     Point bottomLeft = NewPos(pos.x + 30, pos.y + 100);
@@ -241,9 +242,9 @@ void Fence(Point pos) {
     Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 30);
 
 
-    RecSize recSize = newRecSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
-    drawRectangle(recSize, BROWN);
+    drawQuad(quadSize, BROWN);
 
 
 
@@ -254,36 +255,36 @@ void drawBooth(Point pos) {
     // Booth base (rectangle)
     glColor3f(0.8, 0.2, 0.2); // red
     glBegin(GL_POLYGON);
-    glVertex2f((-0.9 * screenWidth /2) + pos.x, (- 0.3 * screenHeight) + pos.y);
-    glVertex2f((-0.6 * screenWidth /2) + pos.x, (- 0.3 * screenHeight) + pos.y);
-    glVertex2f((-0.6 * screenWidth /2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.9 * screenWidth /2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.9 * screenWidth / 2) + pos.x, (-0.3 * screenHeight) + pos.y);
+    glVertex2f((-0.6 * screenWidth / 2) + pos.x, (-0.3 * screenHeight) + pos.y);
+    glVertex2f((-0.6 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.9 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
     glEnd();
 
     // Roof (triangle)
     glColor3f(0.5, 0.1, 0.1);
     glBegin(GL_TRIANGLES);
-    glVertex2f((-0.95 * screenWidth /2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.55 * screenWidth /2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.75 * screenWidth /2) + pos.x, (0.2 * screenHeight) + pos.y);
+    glVertex2f((-0.95 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.55 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.75 * screenWidth / 2) + pos.x, (0.2 * screenHeight) + pos.y);
     glEnd();
 
     // Window
     glColor3f(0.9, 0.9, 1.0); // light blue
     glBegin(GL_POLYGON);
-    glVertex2f((-0.82 * screenWidth /2) + pos.x, (-0.15 * screenHeight) + pos.y);
-    glVertex2f((-0.68 * screenWidth /2) + pos.x, (-0.15 * screenHeight) + pos.y);
-    glVertex2f((-0.68 * screenWidth /2) + pos.x, (-0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.82 * screenWidth /2) + pos.x, (-0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.82 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
+    glVertex2f((-0.68 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
+    glVertex2f((-0.68 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.82 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
     glEnd();
 
     // Sign (Ticket)
     glColor3f(1.0, 1.0, 0.0); // yellow
     glBegin(GL_POLYGON);
-    glVertex2f((-0.85 * screenWidth /2) + pos.x, (0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.65 * screenWidth /2) + pos.x, (0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.65 * screenWidth /2) + pos.x, (0.12 * screenHeight) + pos.y);
-    glVertex2f((-0.85 * screenWidth /2) + pos.x, (0.12 * screenHeight) + pos.y);
+    glVertex2f((-0.85 * screenWidth / 2) + pos.x, (0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.65 * screenWidth / 2) + pos.x, (0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.65 * screenWidth / 2) + pos.x, (0.12 * screenHeight) + pos.y);
+    glVertex2f((-0.85 * screenWidth / 2) + pos.x, (0.12 * screenHeight) + pos.y);
     glEnd();
 }
 
@@ -292,8 +293,8 @@ void drawPath(Point pos) {
     glColor3f(0.6, 0.6, 0.6); // gray
     glBegin(GL_POLYGON);
     glVertex2f((-1.0 * screenWidth) + pos.x, (-0.6 * screenHeight) + pos.y);
-    glVertex2f((1.0 * screenWidth)  + pos.x, (-0.6 * screenHeight) + pos.y);
-    glVertex2f((1.0 * screenWidth)  + pos.x, (-0.4 * screenHeight) + pos.y);
+    glVertex2f((1.0 * screenWidth) + pos.x, (-0.6 * screenHeight) + pos.y);
+    glVertex2f((1.0 * screenWidth) + pos.x, (-0.4 * screenHeight) + pos.y);
     glVertex2f((-1.0 * screenWidth) + pos.x, (-0.4 * screenHeight) + pos.y);
     glEnd();
 
@@ -310,7 +311,50 @@ void drawPath(Point pos) {
     }
 }
 
-// ------ Ferris Wheel -------
+// Draw a single vertical post/pole
+void drawPost(Point base, float height, float width, Color color = WHITE) {
+    QuadSize post = newQuadSize(
+        NewPos(base.x - width / 2, base.y),                    // lower left
+        NewPos(base.x + width / 2, base.y),                    // lower right
+        NewPos(base.x - width / 2, base.y + height),           // upper left
+        NewPos(base.x + width / 2, base.y + height)            // upper right
+    );
+    drawQuad(post, color);
+}
+
+// Draw the light string + colored bulbs
+void drawLightString(Point leftPostTop, Point rightPostTop, int numBulbs, Color bulbColors[]) {
+    // Draw black wire
+    glBegin(GL_LINE_STRIP);
+    glColor4f(BLACK.r, BLACK.g, BLACK.b, 1.0f);
+
+    const int segments = 40;  // curved
+    for (int i = 0; i <= segments; i++) {
+        float t = (float)i / segments;
+        float x = leftPostTop.x + t * (rightPostTop.x - leftPostTop.x);
+
+        // string curve
+        float sag = 30.0f * sinf(PI * t);  // max sag = 30 pixels
+        float y = leftPostTop.y - sag;
+
+        glVertex2f(x, y);
+    }
+    glEnd();
+
+    // Place the colored bulbs
+    float bulbRadius = 22.0f;
+    for (int i = 0; i < numBulbs; i++) {
+        float t = (float)(i + 1) / (numBulbs + 1);  // space evenly
+        float x = leftPostTop.x + t * (rightPostTop.x - leftPostTop.x);
+        float sag = 30.0f * sinf(PI * t);
+        float y = leftPostTop.y - sag;
+
+        Color bulbColor = bulbColors[i % 3];  // cycle through yellow/red/blue
+        drawBasicShape(NewPos(x, y), bulbRadius, 12, bulbColor);
+    }
+}
+
+// ------ Ferris Wheel ------- //
 struct FerrisWheel {
     Point center;
     float radius;
@@ -374,6 +418,9 @@ void display() {
     //Ferris Wheel
     drawFerris(ferris);
 
+    // Create Tree
+    CreateTree(NewPos(-850, 50));
+
     // Create Fence and Pickets
     Fence(NewPos(4, -250));
     Pickets(NewPos(-1200, -250));
@@ -390,8 +437,20 @@ void display() {
     Pickets(NewPos(1075, -250));
     Pickets(NewPos(1200, -250));
 
+    // Light strings and poles:
+    drawPost(NewPos(-950, -420), 400, 30); // Pole 1
+    drawPost(NewPos(-650, -420), 400, 30); // Pole 2
+    drawPost(NewPos(-400, -420), 400, 30); // Pole 3
+
+    // First light string
+    Color leftBulbColors[3] = { YELLOW, RED, BLUE };
+    drawLightString(NewPos(-950, -20), NewPos(-650, -20), 3, leftBulbColors);
+
+    // Second light string
+    Color rightBulbColors[3] = { YELLOW, BLUE, RED };
+    drawLightString(NewPos(-650, -20), NewPos(-400, -20), 3, rightBulbColors);
+
     // Create Trees
-    CreateTree(NewPos(-850, 50));
     CreateTree(NewPos(750, 35));
 
     // Booth and Path
