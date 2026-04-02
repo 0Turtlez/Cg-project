@@ -55,9 +55,9 @@ const Color BLACK = { 0.0f, 0.0f, 0.0f };
 const Color RED = { 1.0f, 0.0f, 0.0f };
 const Color BLUE = { 0.0f, 0.0f, 1.0f };
 const Color GREEN = { 0.0f, 1.0f, 0.0f };
-const Color BROWN = {0.823f , 0.705f , 0.549f};
+const Color BROWN = {0.8745f , 0.6705f , 0.3764f};
 const Color DBROWN = {0.431f ,0.176 ,0.050};
-const Color DGREEN = {0.509f , .431f , 0.070f};
+const Color DGREEN = {0.2823f , .5882f , 0.2941f};
 // -------------- Ease Struct Creation --------------- //
 
 // Makes it easier to create positions
@@ -309,10 +309,19 @@ void display() {
     // Create Ground
     Ground(NewPos(0, -520));
     Fence(NewPos (4 , -250));
+    Pickets(NewPos(-1200 , -250));
+    Pickets(NewPos(-1075 ,-250));
+    Pickets(NewPos(-950 ,- 250));
     Pickets(NewPos( -700 , -250));
     Pickets(NewPos(-575 , -250));
     Pickets(NewPos(-450 , -250));
     Pickets(NewPos(-325 , -250));
+    Pickets(NewPos(600 , -250));
+    Pickets(NewPos( 355 , -250));
+    Pickets(NewPos(475 , -250));
+    Pickets(NewPos(955 , -250));
+    Pickets(NewPos(1075 , -250));
+    Pickets(NewPos(1200 , -250));
     CreateTree(NewPos(-850 ,50));
     CreateTree(NewPos(750 ,35));
     //Ferris Wheel
