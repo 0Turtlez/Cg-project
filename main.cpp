@@ -185,6 +185,7 @@ void CreateTree(Point pos)
 void drawTriangle(TriSize size, Color color = WHITE) {
     // Start describing a primitive where each group of 3 vertices is a triangle
     glBegin(GL_TRIANGLES);
+    glColor4f(color.r, color.g, color.b, color.a);
 
     // Vertex 1: set current color to RED, then set its position
   //  glColor3f(1.0f, 0.0f, 0.0f);      // Red
@@ -382,26 +383,51 @@ struct FerrisWheel {
 void drawFerris(FerrisWheel& fw) {
     // Draw Wheel
     drawBasicShape(fw.center, fw.radius, 100, fw.color);
-    drawBasicShape(fw.center, 290, 30, WHITE);
+    drawBasicShape(fw.center, 290, 30, NewColor(0.0, 0.6, 1.0, 1.0));
 
+    // Make spokes thicker
+    glLineWidth(3.0f);
     // Draw spokes and cars
     for (int i = 0; i < fw.numCars; i++) {
         float angle = (2.0f * PI * i / fw.numCars) + (fw.rotation * PI / 180.0f);
 
+
         float carX = fw.center.x + fw.radius * cos(angle);
         float carY = fw.center.y + fw.radius * sin(angle);
 
+        // TODO: Rotate cars 45 deg
         glBegin(GL_LINES);
         glColor4f(BLACK.r, BLACK.g, BLACK.b, 1.0);
         glVertex2f(fw.center.x, fw.center.y);
         glVertex2f(carX, carY);
         glEnd();
 
-        drawBasicShape(NewPos(carX, carY), 30, 4, RED);
+        drawBasicShape(NewPos(carX, carY), 30, 4, YELLOW);
     }
 }
 
+void drawFerrisBase(Point center, float height, Color color) {
+    TriSize baseTri = newTriSize(
+        center,
+        NewPos(center.x + 200, center.y - height),
+        NewPos(center.x - 200, center.y - height)
+    );
+
+
+    drawTriangle(baseTri, color);
+
+    // second thinner triangle
+    drawTriangle(newTriSize(center, NewPos(center.x + 180, center.y - height), NewPos(center.x - 180, center.y - height)), BLACK);
+    drawTriangle(newTriSize(NewPos(center.x, center.y - 20), NewPos(center.x + 170, center.y - height), NewPos(center.x - 170, center.y - height)), color);
+}
+
+void drawFerrisHub(Point center, float radius, Color color) {
+    drawBasicShape(center, radius, 30, color);
+    drawBasicShape(center, radius*0.5, 20, color);
+}
 FerrisWheel ferris(NewPos(0, 100), 300.0f, 8, BLUE);
+
+
 
 void animateFerris() {
     // TODO: uncomment this after first submission
@@ -416,8 +442,11 @@ void display() {
     Ground(NewPos(0, -520));
 
     //Ferris Wheel
+    drawFerrisBase(ferris.center, 450, BLACK);
+
     drawFerris(ferris);
 
+    drawFerrisHub(ferris.center, 40, BLUE);
     // Create Tree
     CreateTree(NewPos(-850, 50));
 
