@@ -40,7 +40,7 @@ struct RecSize // Rectangle Size Struct
     Point lowerLeft;
     Point lowerRight;
 };
-struct TriSize{
+struct TriSize {
     Point top;
     Point bottomRight;
     Point bottomLeft;
@@ -55,9 +55,9 @@ const Color BLACK = { 0.0f, 0.0f, 0.0f };
 const Color RED = { 1.0f, 0.0f, 0.0f };
 const Color BLUE = { 0.0f, 0.0f, 1.0f };
 const Color GREEN = { 0.0f, 1.0f, 0.0f };
-const Color BROWN = {0.8745f , 0.6705f , 0.3764f};
-const Color DBROWN = {0.431f ,0.176 ,0.050};
-const Color DGREEN = {0.2823f , .5882f , 0.2941f};
+const Color BROWN = { 0.8745f , 0.6705f , 0.3764f };
+const Color DBROWN = { 0.431f ,0.176 ,0.050 };
+const Color DGREEN = { 0.2823f , .5882f , 0.2941f };
 // -------------- Ease Struct Creation --------------- //
 
 // Makes it easier to create positions
@@ -90,7 +90,7 @@ RecSize newRecSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point upp
 
     return recSize;
 }
-TriSize newTriSize(Point top, Point bottomRight , Point bottomLeft){
+TriSize newTriSize(Point top, Point bottomRight, Point bottomLeft) {
     TriSize triSize;
     triSize.top = top;
     triSize.bottomRight = bottomRight;
@@ -169,37 +169,37 @@ void CreateTree(Point pos)
     Point bottomCirclePos = NewPos(pos.x, pos.y + 45);
 
     // Draw Shapes
-    drawBasicShape(leftCirclePos, radius, lines , DGREEN);
-    drawBasicShape(rightCirclePos, radius, lines , DGREEN);
-    drawBasicShape(topCirclePos, radius, lines , DGREEN);
-    drawBasicShape(bottomCirclePos, radius, lines , DGREEN);
+    drawBasicShape(leftCirclePos, radius, lines, DGREEN);
+    drawBasicShape(rightCirclePos, radius, lines, DGREEN);
+    drawBasicShape(topCirclePos, radius, lines, DGREEN);
+    drawBasicShape(bottomCirclePos, radius, lines, DGREEN);
     //Draws the main trunk
-    Point upperLeft = NewPos(pos.x + 50 , pos.y - 125);
-    Point upperRight = NewPos(pos.x - 50 , pos.y - 125);
-    Point lowerLeft = NewPos(pos.x + 50 , pos.y - 370);
-    Point lowerRight = NewPos(pos.x - 50 , pos.y - 370);
-    RecSize recSize = newRecSize(lowerLeft , lowerRight , upperLeft , upperRight);
-    drawRectangle(recSize , DBROWN);
+    Point upperLeft = NewPos(pos.x + 50, pos.y - 125);
+    Point upperRight = NewPos(pos.x - 50, pos.y - 125);
+    Point lowerLeft = NewPos(pos.x + 50, pos.y - 370);
+    Point lowerRight = NewPos(pos.x - 50, pos.y - 370);
+    RecSize recSize = newRecSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    drawRectangle(recSize, DBROWN);
 }
-void drawTriangle(TriSize size ,Color color = WHITE) {
+void drawTriangle(TriSize size, Color color = WHITE) {
     // Start describing a primitive where each group of 3 vertices is a triangle
     glBegin(GL_TRIANGLES);
 
-        // Vertex 1: set current color to RED, then set its position
-      //  glColor3f(1.0f, 0.0f, 0.0f);      // Red
-        glVertex2f(size.top.x,size.top.y );         // Bottom-left area
+    // Vertex 1: set current color to RED, then set its position
+  //  glColor3f(1.0f, 0.0f, 0.0f);      // Red
+    glVertex2f(size.top.x, size.top.y);         // Bottom-left area
 
-        // Vertex 2: set current color to GREEN, then set its position
-     //   glColor3f(0.0f, 1.0f, 0.0f);      // Green
-        glVertex2f(size.bottomRight.x, size.bottomRight.y);          // Bottom-right area
+    // Vertex 2: set current color to GREEN, then set its position
+ //   glColor3f(0.0f, 1.0f, 0.0f);      // Green
+    glVertex2f(size.bottomRight.x, size.bottomRight.y);          // Bottom-right area
 
-        // Vertex 3: set current color to BLUE, then set its position
-    //    glColor3f(0.0f, 0.0f, 1.0f);      // Blue
-        glVertex2f(size.bottomLeft.x, size.bottomLeft.y);
-                   // Top-center area
+    // Vertex 3: set current color to BLUE, then set its position
+//    glColor3f(0.0f, 0.0f, 1.0f);      // Blue
+    glVertex2f(size.bottomLeft.x, size.bottomLeft.y);
+    // Top-center area
 
 
-    // End primitive description
+// End primitive description
 
     glEnd();
 }
@@ -217,23 +217,23 @@ void Ground(Point pos)
 }
 
 
-void Pickets (Point pos){
- Point upperLeft = NewPos(pos.x + 30 , pos.y + 100);
-    Point upperRight = NewPos(pos.x - 30 , pos.y + 100);
-    Point lowerLeft = NewPos(pos.x + 30 , pos.y - 100);
-    Point lowerRight = NewPos(pos.x - 30 , pos.y - 100);
-    RecSize recSize = newRecSize(lowerLeft , lowerRight , upperLeft , upperRight);
-    drawRectangle(recSize , BROWN);
-    Point top = NewPos(pos.x + 0 , pos.y + 120 );
-    Point bottomRight = NewPos(pos.x - 30 , pos.y + 100);
-    Point bottomLeft = NewPos(pos.x + 30 , pos.y + 100);
-    TriSize triSize = newTriSize( top , bottomRight , bottomLeft);
-    drawTriangle(triSize , WHITE);
+void Pickets(Point pos) {
+    Point upperLeft = NewPos(pos.x + 30, pos.y + 100);
+    Point upperRight = NewPos(pos.x - 30, pos.y + 100);
+    Point lowerLeft = NewPos(pos.x + 30, pos.y - 100);
+    Point lowerRight = NewPos(pos.x - 30, pos.y - 100);
+    RecSize recSize = newRecSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    drawRectangle(recSize, BROWN);
+    Point top = NewPos(pos.x + 0, pos.y + 120);
+    Point bottomRight = NewPos(pos.x - 30, pos.y + 100);
+    Point bottomLeft = NewPos(pos.x + 30, pos.y + 100);
+    TriSize triSize = newTriSize(top, bottomRight, bottomLeft);
+    drawTriangle(triSize, WHITE);
 
 
 
 }
-void Fence (Point pos) {
+void Fence(Point pos) {
 
     Point upperLeft = NewPos(pos.x + screenWidth, pos.y + 20);
     Point upperRight = NewPos(pos.x - screenWidth, pos.y + 20);
@@ -248,6 +248,68 @@ void Fence (Point pos) {
 
 
 };
+
+// Booth and Path Drawings
+void drawBooth(Point pos) {
+    // Booth base (rectangle)
+    glColor3f(0.8, 0.2, 0.2); // red
+    glBegin(GL_POLYGON);
+    glVertex2f((-0.9 * screenWidth /2) + pos.x, (- 0.3 * screenHeight) + pos.y);
+    glVertex2f((-0.6 * screenWidth /2) + pos.x, (- 0.3 * screenHeight) + pos.y);
+    glVertex2f((-0.6 * screenWidth /2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.9 * screenWidth /2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glEnd();
+
+    // Roof (triangle)
+    glColor3f(0.5, 0.1, 0.1);
+    glBegin(GL_TRIANGLES);
+    glVertex2f((-0.95 * screenWidth /2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.55 * screenWidth /2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.75 * screenWidth /2) + pos.x, (0.2 * screenHeight) + pos.y);
+    glEnd();
+
+    // Window
+    glColor3f(0.9, 0.9, 1.0); // light blue
+    glBegin(GL_POLYGON);
+    glVertex2f((-0.82 * screenWidth /2) + pos.x, (-0.15 * screenHeight) + pos.y);
+    glVertex2f((-0.68 * screenWidth /2) + pos.x, (-0.15 * screenHeight) + pos.y);
+    glVertex2f((-0.68 * screenWidth /2) + pos.x, (-0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.82 * screenWidth /2) + pos.x, (-0.05 * screenHeight) + pos.y);
+    glEnd();
+
+    // Sign (Ticket)
+    glColor3f(1.0, 1.0, 0.0); // yellow
+    glBegin(GL_POLYGON);
+    glVertex2f((-0.85 * screenWidth /2) + pos.x, (0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.65 * screenWidth /2) + pos.x, (0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.65 * screenWidth /2) + pos.x, (0.12 * screenHeight) + pos.y);
+    glVertex2f((-0.85 * screenWidth /2) + pos.x, (0.12 * screenHeight) + pos.y);
+    glEnd();
+}
+
+void drawPath(Point pos) {
+    // Main path
+    glColor3f(0.6, 0.6, 0.6); // gray
+    glBegin(GL_POLYGON);
+    glVertex2f((-1.0 * screenWidth) + pos.x, (-0.6 * screenHeight) + pos.y);
+    glVertex2f((1.0 * screenWidth)  + pos.x, (-0.6 * screenHeight) + pos.y);
+    glVertex2f((1.0 * screenWidth)  + pos.x, (-0.4 * screenHeight) + pos.y);
+    glVertex2f((-1.0 * screenWidth) + pos.x, (-0.4 * screenHeight) + pos.y);
+    glEnd();
+
+    // Path lines (decorative stripes)
+    glColor3f(1.0, 1.0, 1.0); // white
+
+    for (float x = -0.9; x < 1.0; x += 0.3) {
+        glBegin(GL_POLYGON);
+        glVertex2f((x * screenWidth) + pos.x, (-0.52 * screenHeight) + pos.y);
+        glVertex2f(((x + 0.15) * screenWidth) + pos.x, (-0.52 * screenHeight) + pos.y);
+        glVertex2f(((x + 0.15) * screenWidth) + pos.x, (-0.48 * screenHeight) + pos.y);
+        glVertex2f((x * screenWidth) + pos.x, (-0.48 * screenHeight) + pos.y);
+        glEnd();
+    }
+}
+
 // ------ Ferris Wheel -------
 struct FerrisWheel {
     Point center;
@@ -263,7 +325,8 @@ struct FerrisWheel {
         numCars(_cars),
         color(_c),
         rotation(0.0f)
-    {}
+    {
+    }
 
     void rotate(float speed) {
         rotation += speed;
@@ -272,30 +335,29 @@ struct FerrisWheel {
 };
 
 // TODO: Isolate cars and Wheel draw
-void drawFerris(FerrisWheel &fw) {
+void drawFerris(FerrisWheel& fw) {
     // Draw Wheel
     drawBasicShape(fw.center, fw.radius, 100, fw.color);
     drawBasicShape(fw.center, 290, 30, WHITE);
 
     // Draw spokes and cars
     for (int i = 0; i < fw.numCars; i++) {
-        float angle = (2.0f *  PI * i / fw.numCars) + (fw.rotation * PI / 180.0f);
+        float angle = (2.0f * PI * i / fw.numCars) + (fw.rotation * PI / 180.0f);
 
         float carX = fw.center.x + fw.radius * cos(angle);
         float carY = fw.center.y + fw.radius * sin(angle);
 
         glBegin(GL_LINES);
-            glColor4f(BLACK.r, BLACK.g, BLACK.b, 1.0);
-            glVertex2f(fw.center.x, fw.center.y);
-            glVertex2f(carX, carY);
+        glColor4f(BLACK.r, BLACK.g, BLACK.b, 1.0);
+        glVertex2f(fw.center.x, fw.center.y);
+        glVertex2f(carX, carY);
         glEnd();
 
         drawBasicShape(NewPos(carX, carY), 30, 4, RED);
     }
-
 }
 
-FerrisWheel ferris(NewPos(0, 0), 300.0f, 8, BLUE);
+FerrisWheel ferris(NewPos(0, 100), 300.0f, 8, BLUE);
 
 void animateFerris() {
     // TODO: uncomment this after first submission
@@ -308,24 +370,34 @@ void display() {
 
     // Create Ground
     Ground(NewPos(0, -520));
-    Fence(NewPos (4 , -250));
-    Pickets(NewPos(-1200 , -250));
-    Pickets(NewPos(-1075 ,-250));
-    Pickets(NewPos(-950 ,- 250));
-    Pickets(NewPos( -700 , -250));
-    Pickets(NewPos(-575 , -250));
-    Pickets(NewPos(-450 , -250));
-    Pickets(NewPos(-325 , -250));
-    Pickets(NewPos(600 , -250));
-    Pickets(NewPos( 355 , -250));
-    Pickets(NewPos(475 , -250));
-    Pickets(NewPos(955 , -250));
-    Pickets(NewPos(1075 , -250));
-    Pickets(NewPos(1200 , -250));
-    CreateTree(NewPos(-850 ,50));
-    CreateTree(NewPos(750 ,35));
+
     //Ferris Wheel
     drawFerris(ferris);
+
+    // Create Fence and Pickets
+    Fence(NewPos(4, -250));
+    Pickets(NewPos(-1200, -250));
+    Pickets(NewPos(-1075, -250));
+    Pickets(NewPos(-950, -250));
+    Pickets(NewPos(-700, -250));
+    Pickets(NewPos(-575, -250));
+    Pickets(NewPos(-450, -250));
+    Pickets(NewPos(-325, -250));
+    Pickets(NewPos(600, -250));
+    Pickets(NewPos(355, -250));
+    Pickets(NewPos(475, -250));
+    Pickets(NewPos(955, -250));
+    Pickets(NewPos(1075, -250));
+    Pickets(NewPos(1200, -250));
+
+    // Create Trees
+    CreateTree(NewPos(-850, 50));
+    CreateTree(NewPos(750, 35));
+
+    // Booth and Path
+    drawBooth(NewPos(1000, -300));
+    drawPath(NewPos(0, -200));
+
     // Create Clouds
     CreateCloud(NewPos(700, 400));
     CreateCloud(NewPos(-600, 500));
