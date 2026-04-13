@@ -89,6 +89,7 @@ QuadSize newQuadSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point u
 
     return quadSize;
 }
+
 TriSize newTriSize(Point top, Point bottomRight, Point bottomLeft) {
     TriSize triSize;
     triSize.top = top;
@@ -134,27 +135,65 @@ void drawQuad(QuadSize size, Color color = WHITE)
     glVertex2f(size.upperRight.x, size.upperRight.y);
     glEnd();
 }
+// -------------------------------------------------------- Other Funtionalities ------------------------------------------------------- //
 
-// ---------------- Create New Objects ---------------- //
-
-void CreateCloud(Point pos)
+//Function to compute float random values
+float randf() 
 {
-    // Commonality variable
-    float radius = 100;
-    float lines = 100;
-
-    // Position Child Shapes
-    Point leftCirclePos = NewPos(pos.x - 100, pos.y);
-    Point rightCirclePos = NewPos(pos.x + 100, pos.y);
-    Point topCirclePos = NewPos(pos.x, pos.y - 75);
-    Point bottomCirclePos = NewPos(pos.x, pos.y + 75);
-
-    // Draw Shapes
-    drawBasicShape(leftCirclePos, radius, lines);
-    drawBasicShape(rightCirclePos, radius, lines);
-    drawBasicShape(topCirclePos, radius, lines);
-    drawBasicShape(bottomCirclePos, radius, lines);
+    float decimalValue = (rand() / 100.0f);
+    return decimalValue - std::floorf(decimalValue);
 }
+
+// ------------------------------------------------------ Create New Objects ----------------------------------------------------- //
+class CloudGroup
+{
+    private:
+
+        Point currentPos;
+        Point initPos;
+
+        void Draw()
+        {
+            // Commonality variable
+            float radius = 100;
+            float lines = 100;
+
+            // Position Child Shapes
+            Point leftCirclePos = NewPos(currentPos.x - 100, currentPos.y);
+            Point rightCirclePos = NewPos(currentPos.x + 100, currentPos.y);
+            Point topCirclePos = NewPos(currentPos.x, currentPos.y - 75);
+            Point bottomCirclePos = NewPos(currentPos.x, currentPos.y + 75);
+
+            // Draw Shapes
+            drawBasicShape(leftCirclePos, radius, lines);
+            drawBasicShape(rightCirclePos, radius, lines);
+            drawBasicShape(topCirclePos, radius, lines);
+            drawBasicShape(bottomCirclePos, radius, lines);
+        }
+
+    public:
+
+        CloudGroup(Point pos)
+        {
+            currentPos = pos;
+            initPos = pos;
+        }
+        
+        void Move() 
+        {
+            currentPos.x += 1;
+        }
+
+        void Update() 
+        {
+            glPushMatrix();
+
+            Move();
+            Draw();
+
+            glPopMatrix();
+        }
+};
 
 void CreateTree(Point pos)
 {
@@ -242,17 +281,14 @@ void Fence(Point pos) {
     Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 30);
     Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 30);
 
-
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
     drawQuad(quadSize, BROWN);
-
-
-
 };
 
 // Booth and Path Drawings
 void drawBooth(Point pos) {
+
     // Booth base (rectangle)
     glColor3f(0.8, 0.2, 0.2); // red
     glBegin(GL_POLYGON);
@@ -423,7 +459,7 @@ void drawFerrisBase(Point center, float height, Color color) {
 
 void drawFerrisHub(Point center, float radius, Color color) {
     drawBasicShape(center, radius, 30, color);
-    drawBasicShape(center, radius*0.5, 20, color);
+    drawBasicShape(center, radius * 0.5, 20, color);
 }
 FerrisWheel ferris(NewPos(0, 100), 300.0f, 8, BLUE);
 
@@ -434,7 +470,10 @@ void animateFerris() {
     // ferris.rotate(1.0f);
 }
 
-// ------ Display Function --> Represent Draw Order ------ //
+// ---------------------------------------- Object Group Creation List --------------------------------------- //
+CloudGroup cloud1(NewPos(700, 400));
+
+// ----------------------------------- Display Function --> Represent Draw Order ------------------------------------ //
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -452,19 +491,14 @@ void display() {
 
     // Create Fence and Pickets
     Fence(NewPos(4, -250));
-    Pickets(NewPos(-1200, -250));
-    Pickets(NewPos(-1075, -250));
-    Pickets(NewPos(-950, -250));
-    Pickets(NewPos(-700, -250));
-    Pickets(NewPos(-575, -250));
-    Pickets(NewPos(-450, -250));
-    Pickets(NewPos(-325, -250));
-    Pickets(NewPos(600, -250));
-    Pickets(NewPos(355, -250));
-    Pickets(NewPos(475, -250));
-    Pickets(NewPos(955, -250));
-    Pickets(NewPos(1075, -250));
-    Pickets(NewPos(1200, -250));
+
+    int picketSpread = 125;
+    int picketAmount = 20;
+    for (int i = 0; i < picketAmount; i++) 
+    {
+            Pickets(NewPos(-1200 + (picketSpread * i), -250));
+    }
+        
 
     // Light strings and poles:
     drawPost(NewPos(-950, -420), 400, 30); // Pole 1
@@ -487,8 +521,8 @@ void display() {
     drawPath(NewPos(0, -200));
 
     // Create Clouds
-    CreateCloud(NewPos(700, 400));
-    CreateCloud(NewPos(-600, 500));
+    cloud1.Update();
+    //CloudGroup.Update(NewPos(-600, 500));
 
     glFlush();
 }
