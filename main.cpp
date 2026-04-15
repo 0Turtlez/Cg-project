@@ -1,3 +1,4 @@
+#include <thread>
 #include <cstdlib>
 #include <vector>
 #include <math.h>
@@ -33,6 +34,14 @@ struct Color
     float a;
 };
 
+struct QuadColors
+{
+    Color upperLeft;
+    Color upperRight;
+    Color lowerLeft;
+    Color lowerRight;
+};
+
 struct QuadSize // Quad Size Struct
 {
     Point upperLeft;
@@ -48,15 +57,31 @@ struct TriSize {
 
 // -------- Universally Defined Colors ------------- //
 
-const Color WHITE = { 1.0f, 1.0f, 1.0f };
-const Color BLACK = { 0.0f, 0.0f, 0.0f };
-const Color RED = { 1.0f, 0.0f, 0.0f };
-const Color BLUE = { 0.0f, 0.0f, 1.0f };
-const Color GREEN = { 0.0f, 1.0f, 0.0f };
-const Color YELLOW = { 1.0f, 1.0f, 0.0f };
-const Color BROWN = { 0.8745f , 0.6705f , 0.3764f };
-const Color DBROWN = { 0.431f ,0.176 ,0.050 };
-const Color DGREEN = { 0.2823f , .5882f , 0.2941f };
+// Other Colors
+const Color WHITE = { 1.0f, 1.0f, 1.0f, 1.0f };
+const Color BLACK = { 0.0f, 0.0f, 0.0f, 1.0f };
+const Color RED = { 1.0f, 0.0f, 0.0f, 1.0f };
+const Color YELLOW = { 1.0f, 1.0f, 0.0f, 1.0f };
+
+// Blues
+const Color BLUE = { 0.0f, 0.0f, 1.0f, 1.0f };
+const Color CYAN = { 0.0f, 1.0f, 1.0f, 1.0f };
+const Color LIGHTBLUE = { 0.678f, 0.847f, 0.902f, 1.0f };
+
+// Greens
+const Color GREEN = { 0.0f, 1.0f, 0.0f, 1.0f };
+const Color DGREEN = { 0.2823f , .5882f , 0.2941f, 1.0f };
+
+// Browns
+const Color BROWN = { 0.8745f , 0.6705f , 0.3764f, 1.0f };
+const Color DBROWN = { 0.431f ,0.176f ,0.050f, 1.0f };
+
+// Specific Colors
+const Color SKYTOP = { 0.32f, 0.76f, 0.90f, 1.0f };
+const Color SKYBOTTOM = { 0.27f, 0.5f, 1.0f, 1.0f };
+
+const Color GRASSBOTTOM = { 0.0f, 0.8f, 0.0f, 1.0f };
+
 // -------------- Ease Struct Creation --------------- //
 
 // Makes it easier to create positions
@@ -90,6 +115,16 @@ QuadSize newQuadSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point u
     return quadSize;
 }
 
+QuadColors newQuadColors(Color lowerLeft, Color lowerRight, Color upperLeft, Color upperRight) 
+{
+    QuadColors quadGradientColor;
+    quadGradientColor.lowerLeft = lowerLeft;
+    quadGradientColor.lowerRight = lowerRight;
+    quadGradientColor.upperLeft = upperLeft;
+    quadGradientColor.upperRight = upperRight;
+    return quadGradientColor;
+}
+
 TriSize newTriSize(Point top, Point bottomRight, Point bottomLeft) {
     TriSize triSize;
     triSize.top = top;
@@ -105,7 +140,7 @@ void drawBasicShape(Point pos, float radius, int lines, Color color = WHITE)
 {
     glBegin(GL_POLYGON);
 
-    glColor4f(color.r, color.g, color.b, color.a);  // Purple
+    glColor4f(color.r, color.g, color.b, color.a);  
 
     // Generate points around the circle
     for (int i = 0; i < lines; i++)
@@ -135,6 +170,54 @@ void drawQuad(QuadSize size, Color color = WHITE)
     glVertex2f(size.upperRight.x, size.upperRight.y);
     glEnd();
 }
+
+// Draw Quad of desired size
+void drawQuadGradient(QuadSize size, QuadColors color = newQuadColors(WHITE, WHITE, WHITE, WHITE))
+{
+    glBegin(GL_QUADS);
+
+    // Upper Left
+    glColor4f(color.upperLeft.r, color.upperLeft.g, color.upperLeft.b, color.upperLeft.a);
+    glVertex2f(size.upperLeft.x, size.upperLeft.y);
+
+    // Lower Left
+    glColor4f(color.lowerLeft.r, color.lowerLeft.g, color.lowerLeft.b, color.lowerLeft.a);
+    glVertex2f(size.lowerLeft.x, size.lowerLeft.y);
+
+    // Lower Right
+    glColor4f(color.lowerRight.r, color.lowerRight.g, color.lowerRight.b, color.lowerRight.a);
+    glVertex2f(size.lowerRight.x, size.lowerRight.y);
+
+    // Upper Right
+    glColor4f(color.upperRight.r, color.upperRight.g, color.upperRight.b, color.upperRight.a);
+    glVertex2f(size.upperRight.x, size.upperRight.y);
+    glEnd();
+}
+
+void drawTriangle(TriSize size, Color color = WHITE) {
+    // Start describing a primitive where each group of 3 vertices is a triangle
+    glBegin(GL_TRIANGLES);
+    glColor4f(color.r, color.g, color.b, color.a);
+
+    // Vertex 1: set current color to RED, then set its position
+  //  glColor3f(1.0f, 0.0f, 0.0f);      // Red
+    glVertex2f(size.top.x, size.top.y);         // Bottom-left area
+
+    // Vertex 2: set current color to GREEN, then set its position
+ //   glColor3f(0.0f, 1.0f, 0.0f);      // Green
+    glVertex2f(size.bottomRight.x, size.bottomRight.y);          // Bottom-right area
+
+    // Vertex 3: set current color to BLUE, then set its position
+//    glColor3f(0.0f, 0.0f, 1.0f);      // Blue
+    glVertex2f(size.bottomLeft.x, size.bottomLeft.y);
+    // Top-center area
+
+
+// End primitive description
+
+    glEnd();
+}
+
 // -------------------------------------------------------- Other Funtionalities ------------------------------------------------------- //
 
 //Function to compute float random values
@@ -144,52 +227,123 @@ float randf()
     return decimalValue - std::floorf(decimalValue);
 }
 
+// Timer
+int frameCount;
+float elapsedSeconds;
+int lifeTimeTimer;
+const int FPS = 60;
+
+static bool Timer()
+{
+    frameCount++;
+    elapsedSeconds = (float)frameCount / FPS;
+
+    // Example: print every second
+    if (frameCount % FPS == 0)
+    {
+        return true;
+    }
+
+	return false;
+    
+}
+
 // ------------------------------------------------------ Create New Objects ----------------------------------------------------- //
+
+// Physical Particle
+class CloudParticle
+{
+private:
+
+	// Position
+    Point currentPos;
+    Point initPos;
+    float startYPos;
+    float speed;
+
+    // Scale
+    float radius = 100;
+    float lines = 100;
+
+    // Color
+    Color color;
+
+    void Draw()
+    {
+        drawBasicShape(currentPos, radius, lines, color);
+    }
+
+public:
+    CloudParticle(Point pos)
+    {
+        // Control Position
+		pos.y += (randf() * 200) - 100; // Random vertical offset between -100 and +100
+        startYPos = randf() * pos.y;
+        currentPos = pos;
+        initPos = pos;
+
+		// Control Speed and Size
+		speed = randf(); // Random speed between 0.5 and 1.5
+        radius = 50 + (randf() * 25); // Random radius between 50 and 75
+
+        // Randomize Color
+        float gsColor = 0.8f + (randf() * 0.5f);
+		float alpha = 0.8f + (randf() * 0.5f); // Random alpha between 0.5 and 1.0
+        color = NewColor(gsColor, gsColor, gsColor, alpha);
+    }
+
+    void Move()
+    {
+        currentPos.x += 0.5f * speed;
+		currentPos.y = sinf(currentPos.x * 0.01f) * 20 + initPos.y + startYPos; // Sine wave vertical movement
+    }
+
+    void Update()
+    {
+        glPushMatrix();
+
+        Move();
+        Draw();
+
+        glPopMatrix();
+    }
+};
+
+// Cloud Section For Particles To Spawn
+
 class CloudGroup
 {
     private:
 
-        Point currentPos;
-        Point initPos;
-
-        void Draw()
-        {
-            // Commonality variable
-            float radius = 100;
-            float lines = 100;
-
-            // Position Child Shapes
-            Point leftCirclePos = NewPos(currentPos.x - 100, currentPos.y);
-            Point rightCirclePos = NewPos(currentPos.x + 100, currentPos.y);
-            Point topCirclePos = NewPos(currentPos.x, currentPos.y - 75);
-            Point bottomCirclePos = NewPos(currentPos.x, currentPos.y + 75);
-
-            // Draw Shapes
-            drawBasicShape(leftCirclePos, radius, lines);
-            drawBasicShape(rightCirclePos, radius, lines);
-            drawBasicShape(topCirclePos, radius, lines);
-            drawBasicShape(bottomCirclePos, radius, lines);
-        }
-
+        Point pos;
+        std::vector<CloudParticle> particleList;
     public:
 
         CloudGroup(Point pos)
         {
-            currentPos = pos;
-            initPos = pos;
+            this->pos = pos;
         }
-        
-        void Move() 
+
+        void SpawnParticle() 
         {
-            currentPos.x += 1;
+            if (randf() > 0.9f)
+            {
+                particleList.push_back(CloudParticle(pos));
+            }
+        }
+        void UpdateParticle() {
+            for (auto& circle : particleList)
+            {
+                circle.Update();
+            }
         }
 
         void Update() 
         {
             glPushMatrix();
 
-            Move();
-            Draw();
+            SpawnParticle();
+            UpdateParticle();
 
             glPopMatrix();
         }
@@ -221,30 +375,6 @@ void CreateTree(Point pos)
     drawQuad(quadSize, DBROWN);
 }
 
-void drawTriangle(TriSize size, Color color = WHITE) {
-    // Start describing a primitive where each group of 3 vertices is a triangle
-    glBegin(GL_TRIANGLES);
-    glColor4f(color.r, color.g, color.b, color.a);
-
-    // Vertex 1: set current color to RED, then set its position
-  //  glColor3f(1.0f, 0.0f, 0.0f);      // Red
-    glVertex2f(size.top.x, size.top.y);         // Bottom-left area
-
-    // Vertex 2: set current color to GREEN, then set its position
- //   glColor3f(0.0f, 1.0f, 0.0f);      // Green
-    glVertex2f(size.bottomRight.x, size.bottomRight.y);          // Bottom-right area
-
-    // Vertex 3: set current color to BLUE, then set its position
-//    glColor3f(0.0f, 0.0f, 1.0f);      // Blue
-    glVertex2f(size.bottomLeft.x, size.bottomLeft.y);
-    // Top-center area
-
-
-// End primitive description
-
-    glEnd();
-}
-
 void Ground(Point pos)
 {
     Point upperLeft = NewPos(pos.x + screenWidth, pos.y + 200);
@@ -254,7 +384,19 @@ void Ground(Point pos)
 
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
-    drawQuad(quadSize, GREEN);
+    drawQuadGradient(quadSize, newQuadColors(GRASSBOTTOM, GRASSBOTTOM, GREEN, GREEN));
+}
+
+void Sky() 
+{
+    Point upperLeft = NewPos(screenWidth, screenHeight);
+    Point upperRight = NewPos(-screenWidth, screenHeight);
+    Point lowerLeft = NewPos(screenWidth, -screenHeight);
+    Point lowerRight = NewPos(-screenWidth, -screenHeight);
+
+    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
+
+    drawQuadGradient(quadSize, newQuadColors(SKYBOTTOM, SKYBOTTOM, SKYTOP, SKYTOP));
 }
 
 
@@ -471,11 +613,14 @@ void animateFerris() {
 }
 
 // ---------------------------------------- Object Group Creation List --------------------------------------- //
-CloudGroup cloud1(NewPos(700, 400));
+CloudGroup cloud1(NewPos(-screenWidth - 100, screenHeight - 200));
 
 // ----------------------------------- Display Function --> Represent Draw Order ------------------------------------ //
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
+
+	// Draw Sky
+	Sky();
 
     // Create Ground
     Ground(NewPos(0, -520));
@@ -496,9 +641,8 @@ void display() {
     int picketAmount = 20;
     for (int i = 0; i < picketAmount; i++) 
     {
-            Pickets(NewPos(-1200 + (picketSpread * i), -250));
+        Pickets(NewPos(-1200 + (picketSpread * i), -250));
     }
-        
 
     // Light strings and poles:
     drawPost(NewPos(-950, -420), 400, 30); // Pole 1
@@ -531,10 +675,12 @@ void display() {
 
 // Initialize OpenGL settings
 void init() {
-    glClearColor(0.0, 0.4, 1.0, 1.0); // Background Color
+	glClearColor(0.0, 0.4, 1.0, 1.0); // Does not work with gradient sky --> Deprcated
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-screenWidth, screenWidth, -screenHeight, screenHeight);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 // Will run code every 60 FPS
