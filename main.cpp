@@ -18,6 +18,10 @@
 const int screenWidth = 1280;
 const int screenHeight = 720;
 
+bool pause = false;
+bool nightMode = false;
+int speedMultiplier = 1;
+
 // -------- Structs Defined ----------- //
 
 struct Point
@@ -104,6 +108,13 @@ Color NewColor(float r, float g, float b, float a = 1.0)
     return color;
 }
 
+// Makes it easier to create colors
+Color NewColor(Color color, float a)
+{
+    color.a = a;
+    return color;
+}
+
 QuadSize newQuadSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point upperRight)
 {
     QuadSize quadSize;
@@ -180,17 +191,18 @@ void drawQuadGradient(QuadSize size, QuadColors color = newQuadColors(WHITE, WHI
     glColor4f(color.upperLeft.r, color.upperLeft.g, color.upperLeft.b, color.upperLeft.a);
     glVertex2f(size.upperLeft.x, size.upperLeft.y);
 
-    // Lower Left
-    glColor4f(color.lowerLeft.r, color.lowerLeft.g, color.lowerLeft.b, color.lowerLeft.a);
-    glVertex2f(size.lowerLeft.x, size.lowerLeft.y);
+    // Upper Right
+    glColor4f(color.upperRight.r, color.upperRight.g, color.upperRight.b, color.upperRight.a);
+    glVertex2f(size.upperRight.x, size.upperRight.y);
 
     // Lower Right
     glColor4f(color.lowerRight.r, color.lowerRight.g, color.lowerRight.b, color.lowerRight.a);
     glVertex2f(size.lowerRight.x, size.lowerRight.y);
 
-    // Upper Right
-    glColor4f(color.upperRight.r, color.upperRight.g, color.upperRight.b, color.upperRight.a);
-    glVertex2f(size.upperRight.x, size.upperRight.y);
+    // Lower Left
+    glColor4f(color.lowerLeft.r, color.lowerLeft.g, color.lowerLeft.b, color.lowerLeft.a);
+    glVertex2f(size.lowerLeft.x, size.lowerLeft.y);
+    
     glEnd();
 }
 
@@ -248,9 +260,22 @@ static bool Timer()
     
 }
 
+void static ColorChange(Color& currentColor, Color toColor, float transitionSpeed, bool includeAlpha = false) 
+{
+    // Transition all colors at the same time to a single value
+    currentColor.r += ((toColor.r - currentColor.r) / transitionSpeed);
+    currentColor.g += ((toColor.g - currentColor.g) / transitionSpeed);
+    currentColor.b += ((toColor.b - currentColor.b) / transitionSpeed);
+
+    if (includeAlpha) {
+        currentColor.a += ((toColor.a - currentColor.a) / transitionSpeed);
+    }
+    
+}
+
 // ------------------------------------------------------ Create New Objects ----------------------------------------------------- //
 
-// Physical Particle
+// ----------------------------- Cloud Particle ----------------------------------- //
 class CloudParticle
 {
 private:
@@ -260,22 +285,27 @@ private:
     Point initPos;
     float startYPos;
     float speed;
+    float initSpeed;
 
     // Scale
-    float radius = 100;
+    float radius;
     float lines = 100;
 
     // Color
-    Color color;
+    Color currentColor;
+    Color dayColor;
+    Color nightColor;
 
     void Draw()
     {
-        drawBasicShape(currentPos, radius, lines, color);
+        drawBasicShape(currentPos, radius, lines, currentColor);
     }
 
 public:
-    CloudParticle(Point pos)
+    CloudParticle(Point pos, float initSpeed = 0.5f)
     {
+        this->initSpeed = initSpeed;
+
         // Control Position
 		pos.y += (randf() * 200) - 100; // Random vertical offset between -100 and +100
         startYPos = randf() * pos.y;
@@ -283,19 +313,42 @@ public:
         initPos = pos;
 
 		// Control Speed and Size
-		speed = randf(); // Random speed between 0.5 and 1.5
+		speed = 0.5f + (randf() * 0.5f); // Random speed between 0.5 and 1.0
         radius = 50 + (randf() * 25); // Random radius between 50 and 75
 
         // Randomize Color
-        float gsColor = 0.8f + (randf() * 0.5f);
-		float alpha = 0.8f + (randf() * 0.5f); // Random alpha between 0.5 and 1.0
-        color = NewColor(gsColor, gsColor, gsColor, alpha);
+        float gsColor = 0.9f + (randf() * 0.1f);
+		float alpha = 0.8f + (randf() * 0.2f); // Random alpha between 0.8 and 1.0
+        currentColor = NewColor(gsColor, gsColor, gsColor, alpha);
+
+        // Day and Night Color
+        dayColor = currentColor;
+
+        float gsNight = gsColor - 0.5f;
+        nightColor = NewColor(gsNight, gsNight, gsNight, 0.0f);
+        
     }
 
     void Move()
     {
-        currentPos.x += 0.5f * speed;
-		currentPos.y = sinf(currentPos.x * 0.01f) * 20 + initPos.y + startYPos; // Sine wave vertical movement
+        if (!pause) 
+        {
+            currentPos.x += initSpeed * speed;
+            currentPos.y = sinf(currentPos.x * 0.01f) * 20 + initPos.y + startYPos; // Sine wave vertical movement
+        }
+    }
+
+    void NightMode() 
+    {
+        if (!nightMode) 
+        {
+            ColorChange(currentColor, dayColor, 100, true);
+        }
+        else 
+        {
+            ColorChange(currentColor, nightColor, 100, true);
+        }
+        
     }
 
     void Update()
@@ -303,12 +356,14 @@ public:
         glPushMatrix();
 
         Move();
+        NightMode();
         Draw();
 
         glPopMatrix();
     }
 };
 
+// ------------------------------------ Cloud Group ---------------------------------- //
 // Cloud Section For Particles To Spawn
 
 class CloudGroup
@@ -316,19 +371,22 @@ class CloudGroup
     private:
 
         Point pos;
+        float speed;
         std::vector<CloudParticle> particleList;
+
     public:
 
-        CloudGroup(Point pos)
+        CloudGroup(Point pos, float speed = 0.5f)
         {
             this->pos = pos;
+			this->speed = speed;
         }
 
         void SpawnParticle() 
         {
-            if (randf() > 0.9f)
+            if (randf() > 0.9f) // Spawn rate control
             {
-                particleList.push_back(CloudParticle(pos));
+                particleList.push_back(CloudParticle(pos, speed));
             }
         }
         void UpdateParticle() {
@@ -338,15 +396,353 @@ class CloudGroup
             }
         }
 
+        void NightMode() {
+            if (!nightMode) 
+            {
+                SpawnParticle();
+            }
+        }
+
         void Update() 
         {
             glPushMatrix();
 
-            SpawnParticle();
+            //SpawnParticle();
             UpdateParticle();
+            NightMode();
 
             glPopMatrix();
         }
+};
+
+// ---------------------------------- Sun ------------------------------------ //
+class Sun 
+{
+private:
+    Point initPos;
+    Point currentPos;
+    float radius;
+
+    float sunTime; // animation time
+    float sunDownTime; // animation time for sun going down
+    float speed;
+    float movementRange;
+
+    int rayLayers; // How many rays the sun has
+    float rayGrowth;
+    float rayStartGrowth;
+
+    void Draw()
+    {
+        // Sun Rays
+        for (int i = rayLayers; i > 0; i--) {
+            drawBasicShape(currentPos, radius + i * rayGrowth, 100, NewColor(YELLOW, 1.0f/(i+1)));
+        }
+
+        // Sun Circle
+        drawBasicShape(currentPos, radius, 100, YELLOW);
+    }
+
+public:
+    Sun(Point pos, float radius, float speed) 
+    {
+        this->initPos = pos;
+        this->currentPos = pos;
+        this->speed = speed;
+        this->radius = radius;
+
+        sunTime = 0;
+        sunDownTime = 2 * PI;
+        movementRange = 5;
+
+        // Sun Rays
+        rayLayers = 5;
+        rayGrowth = 1;
+        rayStartGrowth = 20;
+    }
+
+    void Move() 
+    {
+        // Control sun animation time
+        sunTime += speed;
+
+        // Expand and Contrast Rays
+        rayGrowth = (sinf(sunTime) + rayStartGrowth);
+    }
+
+    void NightMode()
+    {
+        if (!nightMode)
+        {
+            if (sunDownTime < 2 * PI) {
+                sunDownTime += speed;   
+            }
+        }
+        else
+        {
+            if (sunDownTime > 2 * PI) {
+                sunDownTime = 0;
+            }
+
+            if (sunDownTime < PI) {
+                sunDownTime += speed;
+            }
+        }
+
+        currentPos.y = ((sinf(sunDownTime + (PI / 2)) - 1) * 1000) + initPos.y;
+    }
+
+    void Update() 
+    {
+        glPushMatrix();
+
+        if (!pause)
+        {
+            NightMode();
+            Move();
+        }
+
+        Draw();
+
+        glPopMatrix();
+    }
+};
+
+// ------------------------------------ Moon --------------------------------- //
+class Moon
+{
+private:
+    Point initPos;
+    Point currentPos;
+    float radius;
+
+    float moonTime; // animation time
+    float moonDownTime; // animation time for moon going down
+    float speed;
+    float movementRange;
+
+    int rayLayers; // How many rays the sun has
+    float rayGrowth;
+    float rayStartGrowth;
+
+    void Draw()
+    {
+        // Moon Rays
+        for (int i = rayLayers; i > 0; i--) {
+            drawBasicShape(currentPos, radius + i * rayGrowth, 100, NewColor(WHITE, 1.0f / (i +2)));
+        }
+
+        // Sun Circle
+        drawBasicShape(currentPos, radius, 100, WHITE);
+    }
+
+public:
+    Moon(Point pos, float radius, float speed)
+    {
+        this->initPos = pos;
+        this->currentPos = pos;
+        this->speed = speed;
+        this->radius = radius;
+
+        moonTime = 0;
+        moonDownTime = PI;
+        movementRange = 5;
+
+        // Sun Rays
+        rayLayers = 2;
+        rayGrowth = 1;
+        rayStartGrowth = 20;
+    }
+
+    void Move()
+    {
+        // Control sun animation time
+        moonTime += speed;
+
+        // Expand and Contrast Rays
+        rayGrowth = (sinf(moonTime) + rayStartGrowth);
+    }
+
+    void NightMode()
+    {
+        if (nightMode)
+        {
+            if (moonDownTime < 2 * PI) {
+                moonDownTime += speed;
+            }
+        }
+        else
+        {
+            if (moonDownTime > 2 * PI) {
+                moonDownTime = 0;
+            }
+
+            if (moonDownTime < PI) {
+                moonDownTime += speed;
+            }
+        }
+
+        currentPos.y = ((sinf(moonDownTime + (PI / 2)) - 1) * 1000) + initPos.y;
+    }
+
+    void Update()
+    {
+        glPushMatrix();
+
+        if (!pause)
+        {
+            NightMode();
+            Move();
+        }
+
+        Draw();
+
+        glPopMatrix();
+    }
+};
+
+/*
+// -------------------------------------- Star Particles ----------------------------------- //
+class StarParticle
+{
+private:
+
+    // Position
+    Point currentPos;
+    Point initPos;
+    float startYPos;
+    float speed;
+    float initSpeed;
+
+    // Scale
+    float radius;
+    float lines = 100;
+
+    // Color
+    Color currentColor;
+    Color dayColor;
+    Color nightColor;
+
+    void Draw()
+    {
+        drawBasicShape(currentPos, radius, lines, currentColor);
+    }
+
+public:
+    StarParticle(Point pos)
+    {
+        this->initSpeed = initSpeed;
+
+        // Control Position
+        pos.y += (randf() * 200) - 100; // Random vertical offset between -100 and +100
+        startYPos = randf() * pos.y;
+        currentPos = pos;
+        initPos = pos;
+
+        // Control Speed and Size
+        speed = 0.5f + (randf() * 0.5f); // Random speed between 0.5 and 1.0
+        radius = 50 + (randf() * 25); // Random radius between 50 and 75
+
+        // Randomize Color
+        float gsColor = 0.9f + (randf() * 0.1f);
+        float alpha = 0.8f + (randf() * 0.2f); // Random alpha between 0.8 and 1.0
+        currentColor = NewColor(gsColor, gsColor, gsColor, alpha);
+
+        // Day and Night Color
+        dayColor = currentColor;
+
+        float gsNight = gsColor - 0.5f;
+        nightColor = NewColor(gsNight, gsNight, gsNight, 0.0f);
+
+    }
+
+    void Move()
+    {
+        if (!pause)
+        {
+            currentPos.x += initSpeed * speed;
+            currentPos.y = sinf(currentPos.x * 0.01f) * 20 + initPos.y + startYPos; // Sine wave vertical movement
+        }
+    }
+
+    void NightMode()
+    {
+        if (!nightMode)
+        {
+            ColorChange(currentColor, dayColor, 100, true);
+        }
+        else
+        {
+            ColorChange(currentColor, nightColor, 100, true);
+        }
+
+    }
+
+    void Update()
+    {
+        glPushMatrix();
+
+        Move();
+        NightMode();
+        Draw();
+
+        glPopMatrix();
+    }
+};
+*/
+
+// -------------------------------- Sky ------------------------------------- //
+class Sky
+{
+private:
+    Color currentColor;
+    Color dayColor;
+    Color nightColor;
+
+    float transitionSpeed;
+
+    void Draw()
+    {
+        Point upperLeft = NewPos(-screenWidth, screenHeight);
+        Point upperRight = NewPos(screenWidth, screenHeight);
+        Point lowerLeft = NewPos(-screenWidth, -screenHeight);
+        Point lowerRight = NewPos(screenWidth, -screenHeight);
+
+        QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
+
+        drawQuadGradient(quadSize, newQuadColors(SKYBOTTOM, SKYBOTTOM, currentColor, currentColor));
+    }
+public:
+
+    Sky(float transitionSpeed)
+    {
+        currentColor = SKYTOP;
+        dayColor = SKYTOP;
+        nightColor = BLACK;
+        this->transitionSpeed = transitionSpeed * 100;
+    }
+
+    void NightMode()
+    {
+        if (!nightMode) 
+        {
+            ColorChange(currentColor, dayColor, transitionSpeed);
+        }
+        else 
+        {
+            ColorChange(currentColor, nightColor, transitionSpeed);
+        }
+    }
+
+    void Update()
+    {
+        glPushMatrix();
+
+        NightMode();
+        Draw();
+
+        glPopMatrix();
+    }
 };
 
 void CreateTree(Point pos)
@@ -387,18 +783,6 @@ void Ground(Point pos)
     drawQuadGradient(quadSize, newQuadColors(GRASSBOTTOM, GRASSBOTTOM, GREEN, GREEN));
 }
 
-void Sky() 
-{
-    Point upperLeft = NewPos(screenWidth, screenHeight);
-    Point upperRight = NewPos(-screenWidth, screenHeight);
-    Point lowerLeft = NewPos(screenWidth, -screenHeight);
-    Point lowerRight = NewPos(-screenWidth, -screenHeight);
-
-    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
-
-    drawQuadGradient(quadSize, newQuadColors(SKYBOTTOM, SKYBOTTOM, SKYTOP, SKYTOP));
-}
-
 
 void Pickets(Point pos) {
     Point upperLeft = NewPos(pos.x + 30, pos.y + 100);
@@ -407,14 +791,12 @@ void Pickets(Point pos) {
     Point lowerRight = NewPos(pos.x - 30, pos.y - 100);
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
     drawQuad(quadSize, BROWN);
+
     Point top = NewPos(pos.x + 0, pos.y + 120);
     Point bottomRight = NewPos(pos.x - 30, pos.y + 100);
     Point bottomLeft = NewPos(pos.x + 30, pos.y + 100);
     TriSize triSize = newTriSize(top, bottomRight, bottomLeft);
     drawTriangle(triSize, WHITE);
-
-
-
 }
 void Fence(Point pos) {
 
@@ -609,18 +991,27 @@ FerrisWheel ferris(NewPos(0, 100), 300.0f, 8, BLUE);
 
 void animateFerris() {
     // TODO: uncomment this after first submission
-    // ferris.rotate(1.0f);
+    //ferris.rotate(1.0f);
 }
 
 // ---------------------------------------- Object Group Creation List --------------------------------------- //
+Sky mainSky(1);
 CloudGroup cloud1(NewPos(-screenWidth - 100, screenHeight - 200));
+Sun sun(NewPos(1000, 500),100, 0.01f);
+Moon moon(NewPos(-1000, 500), 50, 0.01f);
 
 // ----------------------------------- Display Function --> Represent Draw Order ------------------------------------ //
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
 	// Draw Sky
-	Sky();
+	mainSky.Update();
+
+    // Draw Sun
+    sun.Update();
+
+    // Draw Moon
+    moon.Update();
 
     // Create Ground
     Ground(NewPos(0, -520));
@@ -666,8 +1057,7 @@ void display() {
 
     // Create Clouds
     cloud1.Update();
-    //CloudGroup.Update(NewPos(-600, 500));
-
+    
     glFlush();
 }
 
@@ -686,6 +1076,36 @@ void init() {
 // Will run code every 60 FPS
 void update() {
     animateFerris();
+}
+
+void keyboard(unsigned char key, int x, int y) {
+    switch (key) {
+        case '+':
+            if (speedMultiplier < 10) 
+            {
+                speedMultiplier += 1;
+            }
+            
+            break;
+        case '-':
+            if (speedMultiplier > 1)
+            {
+                speedMultiplier -= 1;
+            }
+            break;
+
+        case 'p':
+            pause = !pause; // Reverse Pause Boolean
+            break;
+
+        case 'n':
+            nightMode = !nightMode;
+            break;
+
+        case 27:
+            exit(0);
+            break;
+    }
 }
 
 // Timer func for animation timing
@@ -707,6 +1127,10 @@ int main(int argc, char** argv) {
 
     // Run Graphics
     init();
+
+    // Inputs
+    glutKeyboardFunc(keyboard);
+
     glutDisplayFunc(display);
     glutTimerFunc(0, timer, 0);
     glutMainLoop();
