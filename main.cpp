@@ -920,7 +920,6 @@ struct FerrisWheel {
     Point center;
     float radius;
     float rotation;
-
     int numCars;
     Color color;
 
@@ -929,9 +928,7 @@ struct FerrisWheel {
         radius(_r),
         numCars(_cars),
         color(_c),
-        rotation(0.0f)
-    {
-    }
+        rotation(0.0f) {}
 
     void rotate(float speed) {
         rotation += speed;
@@ -939,59 +936,134 @@ struct FerrisWheel {
     }
 };
 
-// TODO: Isolate cars and Wheel draw
-void drawFerris(FerrisWheel& fw) {
-    // Draw Wheel
-    drawBasicShape(fw.center, fw.radius, 100, fw.color);
-    drawBasicShape(fw.center, 290, 30, NewColor(0.0, 0.6, 1.0, 1.0));
+void drawHollowCenterGradient(Point pos, float radius, float thickness, Color topColor, Color bottomColor) {
+    glLineWidth(thickness);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < 100; i++) {
+        float theta = 2.0f * PI * float(i) / 100.0f;
+        float t = (sinf(theta) + 1.0f) / 2.0f;
+        glColor4f(
+            bottomColor.r + t * (topColor.r - bottomColor.r),
+            bottomColor.g + t * (topColor.g - bottomColor.g),
+            bottomColor.b + t * (topColor.b - bottomColor.b),
+            1.0f
+        );
+        glVertex2f(pos.x + radius * cosf(theta), pos.y + radius * sinf(theta));
+    }
+    glEnd();
+}
 
-    // Make spokes thicker
+void drawCars(Point pos, float size, Color mainColor) {
+    // Body
+    drawQuad(newQuadSize(
+        NewPos(pos.x - size, pos.y - size),
+        NewPos(pos.x + size, pos.y - size),
+        NewPos(pos.x - size, pos.y - (size * 0.2f)),
+        NewPos(pos.x + size, pos.y - (size * 0.2f))
+    ), mainColor);
+
+    // Glass
+    drawQuad(newQuadSize(
+        NewPos(pos.x - size, pos.y - (size * 0.2f)),
+        NewPos(pos.x + size, pos.y - (size * 0.2f)),
+        NewPos(pos.x - size, pos.y + (size * 0.5f)),
+        NewPos(pos.x + size, pos.y + (size * 0.5f))
+    ), NewColor(0.8f, 0.95f, 1.0f, 0.8f)); // Semi-transparent glass
+
+    // Roof
+    Color roofColor = NewColor(mainColor.r * 0.8f, mainColor.g * 0.8f, mainColor.b * 0.8f);
+    drawQuad(newQuadSize(
+        NewPos(pos.x - (size * 1.1f), pos.y + (size * 0.5f)),
+        NewPos(pos.x + (size * 1.1f), pos.y + (size * 0.5f)),
+        NewPos(pos.x - size, pos.y + (size * 0.8f)),
+        NewPos(pos.x + size, pos.y + (size * 0.8f))
+    ), roofColor);
+
+    // Hanger arm
     glLineWidth(3.0f);
-    // Draw spokes and cars
+    glBegin(GL_LINES);
+    glColor4f(0.2f, 0.2f, 0.2f, 1.0f); // Dark gray metal
+    glVertex2f(pos.x, pos.y + (size * 0.8f));
+    glVertex2f(pos.x, pos.y + (size * 1.5f));
+    glEnd();
+}
+
+
+void drawFerris(FerrisWheel& fw) {
+    // Pallete
+    Color carPalette[] = { RED, GREEN, YELLOW, CYAN };
+    int numColors = 4;
+
+    // Rims
+    Color shineBlue = NewColor(0.2f, 0.6f, 1.0f);
+    Color darkBlue = NewColor(0.0f, 0.1f, 0.5f);
+
+    drawHollowCenterGradient(fw.center, fw.radius, 6.0f, shineBlue, darkBlue);
+    drawHollowCenterGradient(fw.center, fw.radius * 0.94f, 4.0f, shineBlue, darkBlue);
+
+    // Spokes and Gondolas
     for (int i = 0; i < fw.numCars; i++) {
         float angle = (2.0f * PI * i / fw.numCars) + (fw.rotation * PI / 180.0f);
+        float endX = fw.center.x + fw.radius * cos(angle);
+        float endY = fw.center.y + fw.radius * sin(angle);
 
-
-        float carX = fw.center.x + fw.radius * cos(angle);
-        float carY = fw.center.y + fw.radius * sin(angle);
-
-        // TODO: Rotate cars 45 deg
+        // Spokes
+        glLineWidth(2.0f);
         glBegin(GL_LINES);
-        glColor4f(BLACK.r, BLACK.g, BLACK.b, 1.0);
+        glColor4f(0.1f, 0.1f, 0.1f, 0.5f); // Fade near center
         glVertex2f(fw.center.x, fw.center.y);
-        glVertex2f(carX, carY);
+        glColor4f(0.4f, 0.4f, 0.4f, 0.8f); // Brighter near rim
+        glVertex2f(endX, endY);
         glEnd();
 
-        drawBasicShape(NewPos(carX, carY), 30, 4, YELLOW);
+        // Pick a color from the pallete
+        Color currentColor = carPalette[i % numColors];
+
+        // Draw Car ad make sure they hang by tip
+        drawCars(NewPos(endX, endY - 45), 25, currentColor);
     }
+
+    // Center hub
+    drawBasicShape(fw.center, 35, 30, NewColor(0.15f, 0.15f, 0.15f)); // Outer casing
+    drawBasicShape(fw.center, 25, 20, NewColor(0.4f, 0.4f, 0.4f));    // Metal bolt
+    drawBasicShape(fw.center, 10, 15, shineBlue);                   // Center cap
 }
 
 void drawFerrisBase(Point center, float height, Color color) {
-    TriSize baseTri = newTriSize(
-        center,
-        NewPos(center.x + 200, center.y - height),
-        NewPos(center.x - 200, center.y - height)
+    float spread = 180.0f;
+
+    Color lightSide = NewColor(0.3f, 0.3f, 0.3f);
+    Color darkSide = NewColor(0.1f, 0.1f, 0.1f);
+
+    // Left beam
+    drawQuadGradient(
+        newQuadSize(
+            NewPos(center.x - spread - 10, center.y - height), // LL
+            NewPos(center.x - spread + 10, center.y - height), // LR
+            NewPos(center.x - 10, center.y),                   // UL
+            NewPos(center.x + 10, center.y)                    // UR
+        ),
+        newQuadColors(darkSide, darkSide, lightSide, lightSide)
     );
 
-
-    drawTriangle(baseTri, color);
-
-    // second thinner triangle
-    drawTriangle(newTriSize(center, NewPos(center.x + 180, center.y - height), NewPos(center.x - 180, center.y - height)), BLACK);
-    drawTriangle(newTriSize(NewPos(center.x, center.y - 20), NewPos(center.x + 170, center.y - height), NewPos(center.x - 170, center.y - height)), color);
+    // Right beam
+    drawQuadGradient(
+        newQuadSize(
+            NewPos(center.x + spread - 10, center.y - height), // LL
+            NewPos(center.x + spread + 10, center.y - height), // LR
+            NewPos(center.x - 10, center.y),                   // UL
+            NewPos(center.x + 10, center.y)                    // UR
+        ),
+        newQuadColors(darkSide, darkSide, lightSide, lightSide)
+    );
 }
 
-void drawFerrisHub(Point center, float radius, Color color) {
-    drawBasicShape(center, radius, 30, color);
-    drawBasicShape(center, radius * 0.5, 20, color);
-}
 FerrisWheel ferris(NewPos(0, 100), 300.0f, 8, BLUE);
 
 
 
 void animateFerris() {
-    // TODO: uncomment this after first submission
-    //ferris.rotate(1.0f);
+    ferris.rotate(1.0f * speedMultiplier / 10.0f);
 }
 
 // ---------------------------------------- Object Group Creation List --------------------------------------- //
@@ -1021,7 +1093,6 @@ void display() {
 
     drawFerris(ferris);
 
-    drawFerrisHub(ferris.center, 40, BLUE);
     // Create Tree
     CreateTree(NewPos(-850, 50));
 
@@ -1058,7 +1129,7 @@ void display() {
     // Create Clouds
     cloud1.Update();
     
-    glFlush();
+    glutSwapBuffers();
 }
 
 // --------- Main ---------- //
@@ -1071,11 +1142,19 @@ void init() {
     gluOrtho2D(-screenWidth, screenWidth, -screenHeight, screenHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 }
 
 // Will run code every 60 FPS
 void update() {
-    animateFerris();
+    if (!pause) {
+        animateFerris();
+
+    }
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -1121,7 +1200,7 @@ int main(int argc, char** argv) {
 
     // Initialize Display
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_MULTISAMPLE);
     glutInitWindowSize(screenWidth, screenHeight);
     glutCreateWindow("Ferris Wheel");
 
