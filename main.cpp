@@ -363,40 +363,46 @@ public:
     }
 };
 
-// ------------------------------------ Cloud Group ---------------------------------- //
-// Cloud Section For Particles To Spawn
+// ------------------------------------ Particle Group ---------------------------------- //
+// Section For Particles To Spawn
 
-class CloudGroup
+template<typename particle>
+class ParticleGroup
 {
     private:
 
         Point pos;
         float speed;
-        std::vector<CloudParticle> particleList;
+        int maxParticles;
+        
+        std::vector<particle> particleList;
 
     public:
 
-        CloudGroup(Point pos, float speed = 0.5f)
+        ParticleGroup(Point pos, int particleNum, float speed = 0.5f)
         {
+            maxParticles = particleNum;
             this->pos = pos;
 			this->speed = speed;
         }
 
         void SpawnParticle() 
         {
-            if (randf() > 0.9f) // Spawn rate control
+            if (randf() > 0.9f || maxParticles < particleList.size()) // Spawn rate control
             {
-                particleList.push_back(CloudParticle(pos, speed));
+                particleList.push_back(particle(pos, speed));
             }
         }
-        void UpdateParticle() {
+        void UpdateParticle() 
+        {
             for (auto& circle : particleList)
             {
                 circle.Update();
             }
         }
 
-        void NightMode() {
+        void NightMode() 
+        {
             if (!nightMode) 
             {
                 SpawnParticle();
@@ -407,7 +413,6 @@ class CloudGroup
         {
             glPushMatrix();
 
-            //SpawnParticle();
             UpdateParticle();
             NightMode();
 
@@ -601,7 +606,6 @@ public:
     }
 };
 
-/*
 // -------------------------------------- Star Particles ----------------------------------- //
 class StarParticle
 {
@@ -610,9 +614,6 @@ private:
     // Position
     Point currentPos;
     Point initPos;
-    float startYPos;
-    float speed;
-    float initSpeed;
 
     // Scale
     float radius;
@@ -629,39 +630,32 @@ private:
     }
 
 public:
-    StarParticle(Point pos)
+    StarParticle(Point pos, float speed)
     {
-        this->initSpeed = initSpeed;
 
         // Control Position
-        pos.y += (randf() * 200) - 100; // Random vertical offset between -100 and +100
-        startYPos = randf() * pos.y;
+        pos = NewPos(rand() % screenWidth * std::powf(-1, std::round(randf())), rand() % screenHeight * std::powf(-1, std::round(randf())));
+
         currentPos = pos;
         initPos = pos;
 
-        // Control Speed and Size
-        speed = 0.5f + (randf() * 0.5f); // Random speed between 0.5 and 1.0
-        radius = 50 + (randf() * 25); // Random radius between 50 and 75
+        // Control Size
+        radius = 1 + (randf() * 2); // Random radius between 50 and 75
 
         // Randomize Color
-        float gsColor = 0.9f + (randf() * 0.1f);
-        float alpha = 0.8f + (randf() * 0.2f); // Random alpha between 0.8 and 1.0
-        currentColor = NewColor(gsColor, gsColor, gsColor, alpha);
+        currentColor = NewColor(WHITE, 0.0f);
 
         // Day and Night Color
-        dayColor = currentColor;
-
-        float gsNight = gsColor - 0.5f;
-        nightColor = NewColor(gsNight, gsNight, gsNight, 0.0f);
+        dayColor = NewColor(WHITE, 0.0f);
+        nightColor = WHITE;
 
     }
 
-    void Move()
+    void Move() // MAY REMOVE
     {
         if (!pause)
         {
-            currentPos.x += initSpeed * speed;
-            currentPos.y = sinf(currentPos.x * 0.01f) * 20 + initPos.y + startYPos; // Sine wave vertical movement
+            
         }
     }
 
@@ -689,7 +683,6 @@ public:
         glPopMatrix();
     }
 };
-*/
 
 // -------------------------------- Sky ------------------------------------- //
 class Sky
@@ -724,13 +717,16 @@ public:
 
     void NightMode()
     {
-        if (!nightMode) 
+        if (!pause) 
         {
-            ColorChange(currentColor, dayColor, transitionSpeed);
-        }
-        else 
-        {
-            ColorChange(currentColor, nightColor, transitionSpeed);
+            if (!nightMode)
+            {
+                ColorChange(currentColor, dayColor, transitionSpeed);
+            }
+            else
+            {
+                ColorChange(currentColor, nightColor, transitionSpeed);
+            }
         }
     }
 
@@ -1068,7 +1064,8 @@ void animateFerris() {
 
 // ---------------------------------------- Object Group Creation List --------------------------------------- //
 Sky mainSky(1);
-CloudGroup cloud1(NewPos(-screenWidth - 100, screenHeight - 200));
+ParticleGroup<CloudParticle> clouds(NewPos(-screenWidth - 100, screenHeight - 200), 10000);
+ParticleGroup<StarParticle> stars(NewPos(0, 0), 100);
 Sun sun(NewPos(1000, 500),100, 0.01f);
 Moon moon(NewPos(-1000, 500), 50, 0.01f);
 
@@ -1078,12 +1075,10 @@ void display() {
 
 	// Draw Sky
 	mainSky.Update();
-
-    // Draw Sun
+    stars.Update();
     sun.Update();
-
-    // Draw Moon
     moon.Update();
+    clouds.Update();
 
     // Create Ground
     Ground(NewPos(0, -520));
@@ -1125,9 +1120,6 @@ void display() {
     // Booth and Path
     drawBooth(NewPos(1000, -300));
     drawPath(NewPos(0, -200));
-
-    // Create Clouds
-    cloud1.Update();
     
     glutSwapBuffers();
 }
@@ -1178,6 +1170,7 @@ void keyboard(unsigned char key, int x, int y) {
             break;
 
         case 'n':
+            if (pause) return;
             nightMode = !nightMode;
             break;
 
