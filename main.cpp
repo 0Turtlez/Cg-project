@@ -374,13 +374,15 @@ class ParticleGroup
         Point pos;
         float speed;
         int maxParticles;
+        float spawnRate;
         
         std::vector<particle> particleList;
 
     public:
 
-        ParticleGroup(Point pos, int particleNum, float speed = 0.5f)
+        ParticleGroup(Point pos, int particleNum, float spawnRate = 0.9f, float speed = 0.5f)
         {
+            this->spawnRate = spawnRate;
             maxParticles = particleNum;
             this->pos = pos;
 			this->speed = speed;
@@ -388,7 +390,7 @@ class ParticleGroup
 
         void SpawnParticle() 
         {
-            if (randf() > 0.9f || maxParticles < particleList.size()) // Spawn rate control
+            if (randf() > spawnRate && maxParticles >= particleList.size()) // Spawn rate control
             {
                 particleList.push_back(particle(pos, speed));
             }
@@ -619,6 +621,11 @@ private:
     float radius;
     float lines = 100;
 
+    // Animation Time
+    float starTime = 0;
+    bool switchDirectionFlag = true;
+    float speed;
+
     // Color
     Color currentColor;
     Color dayColor;
@@ -632,6 +639,8 @@ private:
 public:
     StarParticle(Point pos, float speed)
     {
+        // Glow Speed
+        this->speed = (randf() * speed);
 
         // Control Position
         pos = NewPos(rand() % screenWidth * std::powf(-1, std::round(randf())), rand() % screenHeight * std::powf(-1, std::round(randf())));
@@ -640,7 +649,7 @@ public:
         initPos = pos;
 
         // Control Size
-        radius = 1 + (randf() * 2); // Random radius between 50 and 75
+        radius = 2 + (randf() * 4); // Random radius between 50 and 75
 
         // Randomize Color
         currentColor = NewColor(WHITE, 0.0f);
@@ -651,15 +660,7 @@ public:
 
     }
 
-    void Move() // MAY REMOVE
-    {
-        if (!pause)
-        {
-            
-        }
-    }
-
-    void NightMode()
+    void Animation()
     {
         if (!nightMode)
         {
@@ -667,8 +668,33 @@ public:
         }
         else
         {
-            ColorChange(currentColor, nightColor, 100, true);
+            Color animationColor = WHITE;
+            
+            // Star Glows
+            if (switchDirectionFlag) // Glow Bright
+            {
+                starTime += speed;
+                animationColor = NewColor(animationColor, 1.0f);
+            }
+            else // Die Down
+            {
+                starTime -= speed;
+                animationColor = NewColor(animationColor, 0.0f);
+            }
+
+            // Reverse Glow Direction
+            if (starTime >= 1) 
+            {
+                switchDirectionFlag = false;
+            }
+            else if (starTime <= 0)
+            {
+                switchDirectionFlag = true;
+            }
+            
+            ColorChange(currentColor, animationColor, 100, true);
         }
+        
 
     }
 
@@ -676,8 +702,7 @@ public:
     {
         glPushMatrix();
 
-        Move();
-        NightMode();
+        Animation();
         Draw();
 
         glPopMatrix();
@@ -1062,10 +1087,10 @@ void animateFerris() {
     ferris.rotate(1.0f * speedMultiplier / 10.0f);
 }
 
-// ---------------------------------------- Object Group Creation List --------------------------------------- //
+// ---------------------------------------- Object Creation List --------------------------------------- //
 Sky mainSky(1);
 ParticleGroup<CloudParticle> clouds(NewPos(-screenWidth - 100, screenHeight - 200), 10000);
-ParticleGroup<StarParticle> stars(NewPos(0, 0), 100);
+ParticleGroup<StarParticle> stars(NewPos(0, 0), 1000, 0, 0.01f);
 Sun sun(NewPos(1000, 500),100, 0.01f);
 Moon moon(NewPos(-1000, 500), 50, 0.01f);
 
