@@ -1,4 +1,3 @@
-#include <thread>
 #include <cstdlib>
 #include <vector>
 #include <math.h>
