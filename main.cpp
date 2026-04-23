@@ -108,7 +108,7 @@ Color NewColor(float r, float g, float b, float a = 1.0)
     return color;
 }
 
-// Makes it easier to create colors
+// Makes it easier to change alpha channel
 Color NewColor(Color color, float a)
 {
     color.a = a;
@@ -245,6 +245,7 @@ float elapsedSeconds;
 int lifeTimeTimer;
 const int FPS = 60;
 
+/*
 static bool Timer()
 {
     frameCount++;
@@ -259,7 +260,9 @@ static bool Timer()
 	return false;
     
 }
+*/
 
+// Transistion from on color to the next
 void static ColorChange(Color& currentColor, Color toColor, float transitionSpeed, bool includeAlpha = false) 
 {
     // Transition all colors at the same time to a single value
@@ -1079,7 +1082,7 @@ void drawFerrisBase(Point center, float height, Color color) {
     );
 }
 
-FerrisWheel ferris(NewPos(0, 100), 300.0f, 8, BLUE);
+FerrisWheel ferris(NewPos(0, 50), 300.0f, 8, BLUE);
 
 
 
@@ -1108,6 +1111,16 @@ void display() {
     // Create Ground
     Ground(NewPos(0, -520));
 
+    // Create Fence and Pickets
+    Fence(NewPos(4, -250));
+
+    int picketSpread = 125;
+    int picketAmount = 20;
+    for (int i = 0; i < picketAmount; i++)
+    {
+        Pickets(NewPos(-1200 + (picketSpread * i), -250));
+    }
+
     //Ferris Wheel
     drawFerrisBase(ferris.center, 450, BLACK);
 
@@ -1115,16 +1128,6 @@ void display() {
 
     // Create Tree
     CreateTree(NewPos(-850, 50));
-
-    // Create Fence and Pickets
-    Fence(NewPos(4, -250));
-
-    int picketSpread = 125;
-    int picketAmount = 20;
-    for (int i = 0; i < picketAmount; i++) 
-    {
-        Pickets(NewPos(-1200 + (picketSpread * i), -250));
-    }
 
     // Light strings and poles:
     drawPost(NewPos(-950, -420), 400, 30); // Pole 1
