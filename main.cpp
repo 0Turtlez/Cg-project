@@ -20,6 +20,10 @@ const int screenHeight = 720;
 bool pause = false;
 bool nightMode = false;
 int speedMultiplier = 1;
+std::vector<float> treeYOffsets;
+std::vector<float> treeXOffsets;
+  int treeAmount = 8;
+    int treeSpread = 112;
 
 // -------- Structs Defined ----------- //
 
@@ -773,31 +777,7 @@ public:
     }
 };
 
-void CreateTree(Point pos)
-{
-    // Commonality variable
-    float radius = 100;
-    float lines = 100;
 
-    // Position Child Shapes
-    Point leftCirclePos = NewPos(pos.x - 55, pos.y);
-    Point rightCirclePos = NewPos(pos.x + 55, pos.y);
-    Point topCirclePos = NewPos(pos.x, pos.y - 45);
-    Point bottomCirclePos = NewPos(pos.x, pos.y + 45);
-
-    // Draw Shapes
-    drawBasicShape(leftCirclePos, radius, lines, DGREEN);
-    drawBasicShape(rightCirclePos, radius, lines, DGREEN);
-    drawBasicShape(topCirclePos, radius, lines, DGREEN);
-    drawBasicShape(bottomCirclePos, radius, lines, DGREEN);
-    //Draws the main trunk
-    Point upperLeft = NewPos(pos.x + 20, pos.y - 125);
-    Point upperRight = NewPos(pos.x - 20, pos.y - 125);
-    Point lowerLeft = NewPos(pos.x + 20, pos.y - 370);
-    Point lowerRight = NewPos(pos.x - 20, pos.y - 370);
-    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
-    drawQuadGradient(quadSize, newQuadColors(DBROWN, DBROWN, WalnutB, WalnutB));
-}
 
 void Ground(Point pos)
 {
@@ -811,18 +791,45 @@ void Ground(Point pos)
     drawQuadGradient(quadSize, newQuadColors(GRASSBOTTOM, GRASSBOTTOM, GREEN, GREEN));
 }
 
+void CreateTree(Point pos)
+{
+    // Commonality variable
+    float radius = 25;
+    float lines = 100;
 
+
+
+
+    //Draws the main trunk
+    Point upperLeft = NewPos(pos.x + 15, pos.y - 200);
+    Point upperRight = NewPos(pos.x - 15, pos.y - 200);
+    Point lowerLeft = NewPos(pos.x + 15, pos.y - 300);
+    Point lowerRight = NewPos(pos.x - 15, pos.y - 300);
+
+    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    drawQuadGradient(quadSize, newQuadColors(WalnutB, WalnutB, DBROWN, DBROWN));
+     // Position Child Shapes
+    Point leftCirclePos = NewPos(pos.x - 25, pos.y - 175);
+    Point rightCirclePos = NewPos(pos.x + 25, pos.y - 175);
+    Point topCirclePos = NewPos(pos.x, pos.y - 150);
+    Point bottomCirclePos = NewPos(pos.x, pos.y - 185);
+     // Draw Shapes
+    drawBasicShape(leftCirclePos, radius, lines, DGREEN);
+    drawBasicShape(rightCirclePos, radius, lines, DGREEN);
+    drawBasicShape(topCirclePos, radius, lines, DGREEN);
+    drawBasicShape(bottomCirclePos, radius, lines, DGREEN);
+}
 void Pickets(Point pos) {
-    Point upperLeft = NewPos(pos.x + 20, pos.y + 100);
-    Point upperRight = NewPos(pos.x - 20, pos.y + 100);
-    Point lowerLeft = NewPos(pos.x + 20, pos.y - 100);
-    Point lowerRight = NewPos(pos.x - 20, pos.y - 100);
+    Point upperLeft = NewPos(pos.x + 10, pos.y + 35);
+    Point upperRight = NewPos(pos.x - 10, pos.y + 35);
+    Point lowerLeft = NewPos(pos.x + 10, pos.y - 35);
+    Point lowerRight = NewPos(pos.x - 10, pos.y - 35);
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
     QuadColors picketGrad = newQuadColors(FENCE_WOOD, FENCE_WOOD, FENCE_HIGHLIGHT, FENCE_HIGHLIGHT);
     drawQuadGradient(quadSize, picketGrad);
-    Point top = NewPos(pos.x + 0, pos.y + 120);
-    Point bottomRight = NewPos(pos.x - 30, pos.y + 100);
-    Point bottomLeft = NewPos(pos.x + 30, pos.y + 100);
+    Point top = NewPos(pos.x + 0, pos.y + 40);
+    Point bottomRight = NewPos(pos.x - 10, pos.y + 30);
+    Point bottomLeft = NewPos(pos.x + 10, pos.y + 30);
     TriSize triSize = newTriSize(top, bottomRight, bottomLeft);
 
     drawTriangle(triSize, FENCE_HIGHLIGHT);
@@ -833,10 +840,10 @@ void Pickets(Point pos) {
 }
 void Fence(Point pos) {
 
-    Point upperLeft = NewPos(pos.x + screenWidth, pos.y + 10);
-    Point upperRight = NewPos(pos.x - screenWidth, pos.y + 10);
-    Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 20);
-    Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 20);
+    Point upperLeft = NewPos(pos.x + screenWidth, pos.y + 5);
+    Point upperRight = NewPos(pos.x - screenWidth, pos.y + 5);
+    Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 10);
+    Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 10);
 
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
@@ -847,6 +854,7 @@ void Fence(Point pos) {
 
 
 };
+
 
 // Booth and Path Drawings
 void drawBooth(Point pos) {
@@ -1124,24 +1132,34 @@ void display() {
 
     // Create Ground
     Ground(NewPos(0, -520));
+    // Create Tree
+   // CreateTree(NewPos(-850, -20));
 
+    // Create Trees
+   // CreateTree(NewPos(750, -25));
     // Create Fence and Pickets
-    Fence(NewPos(4, -250));
+
+
+
+    Fence(NewPos(4, -295));
 
     int picketSpread = 125;
     int picketAmount = 20;
     for (int i = 0; i < picketAmount; i++)
     {
-        Pickets(NewPos(-1200 + (picketSpread * i), -250));
+        Pickets(NewPos(-1200 + (picketSpread * i), -300));
     }
+
+    for(int i = 0; i < treeAmount; i++) {
+    CreateTree(NewPos( (treeXOffsets[i]), treeYOffsets[i]));
+}
 
     //Ferris Wheel
     drawFerrisBase(ferris.center, 450, BLACK);
 
     drawFerris(ferris);
 
-    // Create Tree
-    CreateTree(NewPos(-850, 50));
+
 
     // Light strings and poles:
     drawPost(NewPos(-950, -420), 400, 30); // Pole 1
@@ -1156,8 +1174,6 @@ void display() {
     Color rightBulbColors[3] = { YELLOW, BLUE, RED };
     drawLightString(NewPos(-650, -20), NewPos(-400, -20), 3, rightBulbColors);
 
-    // Create Trees
-    CreateTree(NewPos(750, 35));
 
     // Booth and Path
     drawBooth(NewPos(1000, -300));
@@ -1181,6 +1197,18 @@ void init() {
     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    float screenWidthTotal = 2.0f * screenWidth; // 2560 total width
+    float slotWidth = screenWidthTotal / treeAmount;
+    for(int i = 0; i < treeAmount; i++) {
+    float zonestart = -screenWidth + (i * slotWidth);
+
+
+    float lockedY = -30.0f + (randf() * -40.0f);
+
+    float randomX = zonestart + (randf() * slotWidth);
+    treeXOffsets.push_back(randomX);
+    treeYOffsets.push_back(lockedY);
+}
 }
 
 // Will run code every 60 FPS
