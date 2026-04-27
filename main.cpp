@@ -238,29 +238,6 @@ float randf()
     return decimalValue - std::floorf(decimalValue);
 }
 
-// Timer
-int frameCount;
-float elapsedSeconds;
-int lifeTimeTimer;
-const int FPS = 60;
-
-/*
-static bool Timer()
-{
-    frameCount++;
-    elapsedSeconds = (float)frameCount / FPS;
-
-    // Example: print every second
-    if (frameCount % FPS == 0)
-    {
-        return true;
-    }
-
-	return false;
-    
-}
-*/
-
 // Transistion from on color to the next
 void static ColorChange(Color& currentColor, Color toColor, float transitionSpeed, bool includeAlpha = false) 
 {
