@@ -220,32 +220,32 @@ void Ground(Point pos)
 
 
 void Pickets(Point pos) {
-    Point upperLeft = NewPos(pos.x + 30, pos.y + 100);
-    Point upperRight = NewPos(pos.x - 30, pos.y + 100);
-    Point lowerLeft = NewPos(pos.x + 30, pos.y - 100);
-    Point lowerRight = NewPos(pos.x - 30, pos.y - 100);
+    Point upperLeft = NewPos(pos.x + 20, pos.y + 100);
+    Point upperRight = NewPos(pos.x - 20, pos.y + 100);
+    Point lowerLeft = NewPos(pos.x + 20, pos.y - 100);
+    Point lowerRight = NewPos(pos.x - 20, pos.y - 100);
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
     drawQuad(quadSize, BROWN);
     Point top = NewPos(pos.x + 0, pos.y + 120);
     Point bottomRight = NewPos(pos.x - 30, pos.y + 100);
     Point bottomLeft = NewPos(pos.x + 30, pos.y + 100);
     TriSize triSize = newTriSize(top, bottomRight, bottomLeft);
-    drawTriangle(triSize, WHITE);
+    drawTriangle(triSize, BROWN);
 
 
 
 }
 void Fence(Point pos) {
 
-    Point upperLeft = NewPos(pos.x + screenWidth, pos.y + 20);
-    Point upperRight = NewPos(pos.x - screenWidth, pos.y + 20);
-    Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 30);
-    Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 30);
+    Point upperLeft = NewPos(pos.x + screenWidth, pos.y + 10);
+    Point upperRight = NewPos(pos.x - screenWidth, pos.y + 10);
+    Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 20);
+    Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 20);
 
 
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
-    drawQuad(quadSize, BROWN);
+    drawQuad(quadSize, DBROWN);
 
 
 
