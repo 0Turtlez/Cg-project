@@ -22,7 +22,7 @@ bool nightMode = false;
 int speedMultiplier = 1;
 std::vector<float> treeYOffsets;
 std::vector<float> treeXOffsets;
-  int treeAmount = 8;
+  int treeAmount = 10;
     int treeSpread = 112;
 
 // -------- Structs Defined ----------- //
@@ -824,12 +824,7 @@ void Fence(Point pos) {
 
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
-
     drawQuad(quadSize, FENCE_RAIL);
-
-
-
-
 };
 
 
@@ -839,49 +834,65 @@ void drawBooth(Point pos) {
     // Booth base (rectangle)
     glColor3f(0.8, 0.2, 0.2); // red
     glBegin(GL_POLYGON);
-    glVertex2f((-0.9 * screenWidth / 2) + pos.x, (-0.3 * screenHeight) + pos.y);
-    glVertex2f((-0.6 * screenWidth / 2) + pos.x, (-0.3 * screenHeight) + pos.y);
-    glVertex2f((-0.6 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.9 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.5 * screenWidth / 2) + pos.x, (-0.157 * screenHeight) + pos.y);
+    glVertex2f((-0.25 * screenWidth / 2) + pos.x, (-0.157 * screenHeight) + pos.y);
+    glVertex2f((-0.25 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.5 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
     glEnd();
 
-    // Roof (triangle)
+    // Roof (trapezoid)
     glColor3f(0.5, 0.1, 0.1);
-    glBegin(GL_TRIANGLES);
-    glVertex2f((-0.95 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.55 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.75 * screenWidth / 2) + pos.x, (0.2 * screenHeight) + pos.y);
+    glBegin(GL_POLYGON);
+    glVertex2f((-0.5 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.45 * screenWidth / 2) + pos.x, (0.075 * screenHeight) + pos.y);
+    glVertex2f((-0.3 * screenWidth / 2) + pos.x, (0.075 * screenHeight) + pos.y);
+    glVertex2f((-0.25 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
     glEnd();
 
     // Window
     glColor3f(0.9, 0.9, 1.0); // light blue
     glBegin(GL_POLYGON);
-    glVertex2f((-0.82 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
-    glVertex2f((-0.68 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
-    glVertex2f((-0.68 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.82 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.475 * screenWidth / 2) + pos.x, (-0.1 * screenHeight) + pos.y);
+    glVertex2f((-0.275 * screenWidth / 2) + pos.x, (-0.1 * screenHeight) + pos.y);
+    glVertex2f((-0.275 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.475 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
     glEnd();
 
     // Sign (Ticket)
     glColor3f(1.0, 1.0, 0.0); // yellow
     glBegin(GL_POLYGON);
-    glVertex2f((-0.85 * screenWidth / 2) + pos.x, (0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.65 * screenWidth / 2) + pos.x, (0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.65 * screenWidth / 2) + pos.x, (0.12 * screenHeight) + pos.y);
-    glVertex2f((-0.85 * screenWidth / 2) + pos.x, (0.12 * screenHeight) + pos.y);
+    glVertex2f((-0.45 * screenWidth / 2) + pos.x, (0.02 * screenHeight) + pos.y);
+    glVertex2f((-0.3 * screenWidth / 2) + pos.x, (0.02 * screenHeight) + pos.y);
+    glVertex2f((-0.3 * screenWidth / 2) + pos.x, (0.06 * screenHeight) + pos.y);
+    glVertex2f((-0.45 * screenWidth / 2) + pos.x, (0.06 * screenHeight) + pos.y);
     glEnd();
+
+    // Draw "TICKETS" text in the middle of the sign
+    glColor3f(0.0, 0.0, 0.0); // black text
+
+    float textX = (-0.44 * screenWidth / 2) + pos.x; // slightly adjusted for centering
+    float textY = (0.0325 * screenHeight) + pos.y;
+
+    glRasterPos2f(textX, textY);
+
+    const char* text = "TICKETS";
+    for (int i = 0; text[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, text[i]);
+    }
+
 }
 
 void drawPath(Point pos) {
     // Main path
     glColor3f(0.6, 0.6, 0.6); // gray
     glBegin(GL_POLYGON);
-    glVertex2f((-1.0 * screenWidth) + pos.x, (-0.6 * screenHeight) + pos.y);
-    glVertex2f((1.0 * screenWidth) + pos.x, (-0.6 * screenHeight) + pos.y);
+    glVertex2f((-1.0 * screenWidth) + pos.x, (-0.5 * screenHeight) + pos.y);
+    glVertex2f((1.0 * screenWidth) + pos.x, (-0.5 * screenHeight) + pos.y);
     glVertex2f((1.0 * screenWidth) + pos.x, (-0.4 * screenHeight) + pos.y);
     glVertex2f((-1.0 * screenWidth) + pos.x, (-0.4 * screenHeight) + pos.y);
     glEnd();
 
+    /*
     // Path lines (decorative stripes)
     glColor3f(1.0, 1.0, 1.0); // white
 
@@ -892,7 +903,7 @@ void drawPath(Point pos) {
         glVertex2f(((x + 0.15) * screenWidth) + pos.x, (-0.48 * screenHeight) + pos.y);
         glVertex2f((x * screenWidth) + pos.x, (-0.48 * screenHeight) + pos.y);
         glEnd();
-    }
+    }*/
 }
 
 // Draw a single vertical post/pole
@@ -1127,23 +1138,21 @@ void display() {
 
     Fence(NewPos(4, -295));
 
-    int picketSpread = 125;
-    int picketAmount = 20;
+    int picketSpread = 50;
+    int picketAmount = 50;
     for (int i = 0; i < picketAmount; i++)
     {
-        Pickets(NewPos(-1200 + (picketSpread * i), -300));
+        Pickets(NewPos(-1250 + (picketSpread * i), -300));
     }
 
     for(int i = 0; i < treeAmount; i++) {
-    CreateTree(NewPos( (treeXOffsets[i]), treeYOffsets[i]));
-}
+        CreateTree(NewPos( (treeXOffsets[i]), treeYOffsets[i] - 25));
+    }
 
     //Ferris Wheel
     drawFerrisBase(ferris.center, 450, BLACK);
 
     drawFerris(ferris);
-
-
 
     //Ferris Wheel
     drawFerrisBase(ferris.center, 450, BLACK);
@@ -1151,7 +1160,7 @@ void display() {
     drawFerris(ferris);
 
     // Create Tree
-    CreateTree(NewPos(-850, 50));
+    //CreateTree(NewPos(-850, 50));
 
     // Light strings and poles:
     drawPost(NewPos(-950, -420), 400, 30); // Pole 1
@@ -1168,8 +1177,12 @@ void display() {
 
 
     // Booth and Path
-    drawBooth(NewPos(1000, -300));
+    drawBooth(NewPos(800, -375));
     drawPath(NewPos(0, -200));
+
+    for (int i = 0; i < treeAmount; i++) {
+       CreateTree(NewPos((treeXOffsets[(treeXOffsets.size()-1) - i]), treeYOffsets[i] - 250));
+    }
 
 
     glutSwapBuffers();
@@ -1190,13 +1203,14 @@ void init() {
     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+
     float screenWidthTotal = 2.0f * screenWidth; // 2560 total width
     float slotWidth = screenWidthTotal / treeAmount;
     for(int i = 0; i < treeAmount; i++) {
     float zonestart = -screenWidth + (i * slotWidth);
 
 
-    float lockedY = -30.0f + (randf() * -40.0f);
+    float lockedY = -30.0f + (randf() * -60.0f);
 
     float randomX = zonestart + (randf() * slotWidth);
     treeXOffsets.push_back(randomX);
