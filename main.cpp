@@ -700,7 +700,11 @@ public:
     {
         glPushMatrix();
 
-        Animation();
+        if (!pause)
+        {
+            Animation();
+        }
+        
         Draw();
 
         glPopMatrix();
