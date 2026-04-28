@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/toolchain/vcpkg.cmake" CACHE STRING "")
 project(cgproject)
 
 set(CMAKE_CXX_STANDARD 17)

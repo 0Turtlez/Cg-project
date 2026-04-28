@@ -20,6 +20,10 @@ const int screenHeight = 720;
 bool pause = false;
 bool nightMode = false;
 int speedMultiplier = 1;
+std::vector<float> treeYOffsets;
+std::vector<float> treeXOffsets;
+  int treeAmount = 8;
+    int treeSpread = 112;
 
 // -------- Structs Defined ----------- //
 
@@ -76,8 +80,13 @@ const Color GREEN = { 0.0f, 1.0f, 0.0f, 1.0f };
 const Color DGREEN = { 0.2823f , .5882f , 0.2941f, 1.0f };
 
 // Browns
-const Color BROWN = { 0.8745f , 0.6705f , 0.3764f, 1.0f };
-const Color DBROWN = { 0.431f ,0.176f ,0.050f, 1.0f };
+const Color DBROWN = { 0.431f, 0.176f, 0.050f, 1.0f };
+const Color WalnutB = { 0.290f, 0.196f, 0.102f, 1.0f };
+
+// Restored Fence Palette (Significant bit darker)
+const Color FENCE_WOOD = { 0.52f, 0.38f, 0.22f, 1.0f };
+const Color FENCE_HIGHLIGHT = { 0.72f, 0.55f, 0.35f, 1.0f };
+const Color FENCE_RAIL = { 0.58f, 0.45f, 0.32f, 1.0f };
 
 // Specific Colors
 const Color SKYTOP = { 0.32f, 0.76f, 0.90f, 1.0f };
@@ -125,7 +134,7 @@ QuadSize newQuadSize(Point lowerLeft, Point lowerRight, Point upperLeft, Point u
     return quadSize;
 }
 
-QuadColors newQuadColors(Color lowerLeft, Color lowerRight, Color upperLeft, Color upperRight) 
+QuadColors newQuadColors(Color lowerLeft, Color lowerRight, Color upperLeft, Color upperRight)
 {
     QuadColors quadGradientColor;
     quadGradientColor.lowerLeft = lowerLeft;
@@ -150,7 +159,7 @@ void drawBasicShape(Point pos, float radius, int lines, Color color = WHITE)
 {
     glBegin(GL_POLYGON);
 
-    glColor4f(color.r, color.g, color.b, color.a);  
+    glColor4f(color.r, color.g, color.b, color.a);
 
     // Generate points around the circle
     for (int i = 0; i < lines; i++)
@@ -201,7 +210,7 @@ void drawQuadGradient(QuadSize size, QuadColors color = newQuadColors(WHITE, WHI
     // Lower Left
     glColor4f(color.lowerLeft.r, color.lowerLeft.g, color.lowerLeft.b, color.lowerLeft.a);
     glVertex2f(size.lowerLeft.x, size.lowerLeft.y);
-    
+
     glEnd();
 }
 
@@ -232,10 +241,10 @@ void drawTriangle(TriSize size, Color color = WHITE) {
 // -------------------------------------------------------- Other Funtionalities ------------------------------------------------------- //
 
 //Function to compute float random values
-float randf() 
+float randf()
 {
     float decimalValue = (rand() / 100.0f);
-    return decimalValue - std::floorf(decimalValue);
+    return decimalValue - std::floor(decimalValue);
 }
 
 // Transistion from on color to the next
@@ -249,7 +258,7 @@ void static ColorChange(Color& currentColor, Color toColor, float transitionSpee
     if (includeAlpha) {
         currentColor.a += ((toColor.a - currentColor.a) / transitionSpeed);
     }
-    
+
 }
 
 // ------------------------------------------------------ Create New Objects ----------------------------------------------------- //
@@ -305,29 +314,29 @@ public:
 
         float gsNight = gsColor - 0.5f;
         nightColor = NewColor(gsNight, gsNight, gsNight, 0.0f);
-        
+
     }
 
     void Move()
     {
-        if (!pause) 
+        if (!pause)
         {
             currentPos.x += initSpeed * speed;
             currentPos.y = sinf(currentPos.x * 0.01f) * 20 + initPos.y + startYPos; // Sine wave vertical movement
         }
     }
 
-    void NightMode() 
+    void NightMode()
     {
-        if (!nightMode) 
+        if (!nightMode)
         {
             ColorChange(currentColor, dayColor, 100, true);
         }
-        else 
+        else
         {
             ColorChange(currentColor, nightColor, 100, true);
         }
-        
+
     }
 
     void Update()
@@ -354,7 +363,7 @@ class ParticleGroup
         float speed;
         int maxParticles;
         float spawnRate;
-        
+
         std::vector<particle> particleList;
 
     public:
@@ -367,14 +376,14 @@ class ParticleGroup
 			this->speed = speed;
         }
 
-        void SpawnParticle() 
+        void SpawnParticle()
         {
             if (randf() > spawnRate && maxParticles >= particleList.size()) // Spawn rate control
             {
                 particleList.push_back(particle(pos, speed));
             }
         }
-        void UpdateParticle() 
+        void UpdateParticle()
         {
             for (auto& circle : particleList)
             {
@@ -382,15 +391,15 @@ class ParticleGroup
             }
         }
 
-        void NightMode() 
+        void NightMode()
         {
-            if (!nightMode) 
+            if (!nightMode)
             {
                 SpawnParticle();
             }
         }
 
-        void Update() 
+        void Update()
         {
             glPushMatrix();
 
@@ -402,7 +411,7 @@ class ParticleGroup
 };
 
 // ---------------------------------- Sun ------------------------------------ //
-class Sun 
+class Sun
 {
 private:
     Point initPos;
@@ -430,7 +439,7 @@ private:
     }
 
 public:
-    Sun(Point pos, float radius, float speed) 
+    Sun(Point pos, float radius, float speed)
     {
         this->initPos = pos;
         this->currentPos = pos;
@@ -447,7 +456,7 @@ public:
         rayStartGrowth = 20;
     }
 
-    void Move() 
+    void Move()
     {
         // Control sun animation time
         sunTime += speed;
@@ -461,7 +470,7 @@ public:
         if (!nightMode)
         {
             if (sunDownTime < 2 * PI) {
-                sunDownTime += speed;   
+                sunDownTime += speed;
             }
         }
         else
@@ -478,7 +487,7 @@ public:
         currentPos.y = ((sinf(sunDownTime + (PI / 2)) - 1) * 1000) + initPos.y;
     }
 
-    void Update() 
+    void Update()
     {
         glPushMatrix();
 
@@ -622,7 +631,7 @@ public:
         this->speed = (randf() * speed);
 
         // Control Position
-        pos = NewPos(rand() % screenWidth * std::powf(-1, std::round(randf())), rand() % screenHeight * std::powf(-1, std::round(randf())));
+        pos = NewPos(rand() % screenWidth * std::pow(-1, std::round(randf())), rand() % screenHeight * std::pow(-1, std::round(randf())));
 
         currentPos = pos;
         initPos = pos;
@@ -648,7 +657,7 @@ public:
         else
         {
             Color animationColor = WHITE;
-            
+
             // Star Glows
             if (switchDirectionFlag) // Glow Bright
             {
@@ -662,7 +671,7 @@ public:
             }
 
             // Reverse Glow Direction
-            if (starTime >= 1) 
+            if (starTime >= 1)
             {
                 switchDirectionFlag = false;
             }
@@ -670,10 +679,10 @@ public:
             {
                 switchDirectionFlag = true;
             }
-            
+
             ColorChange(currentColor, animationColor, 100, true);
         }
-        
+
 
     }
 
@@ -721,7 +730,7 @@ public:
 
     void NightMode()
     {
-        if (!pause) 
+        if (!pause)
         {
             if (!nightMode)
             {
@@ -745,31 +754,7 @@ public:
     }
 };
 
-void CreateTree(Point pos)
-{
-    // Commonality variable
-    float radius = 100;
-    float lines = 100;
 
-    // Position Child Shapes
-    Point leftCirclePos = NewPos(pos.x - 55, pos.y);
-    Point rightCirclePos = NewPos(pos.x + 55, pos.y);
-    Point topCirclePos = NewPos(pos.x, pos.y - 45);
-    Point bottomCirclePos = NewPos(pos.x, pos.y + 45);
-
-    // Draw Shapes
-    drawBasicShape(leftCirclePos, radius, lines, DGREEN);
-    drawBasicShape(rightCirclePos, radius, lines, DGREEN);
-    drawBasicShape(topCirclePos, radius, lines, DGREEN);
-    drawBasicShape(bottomCirclePos, radius, lines, DGREEN);
-    //Draws the main trunk
-    Point upperLeft = NewPos(pos.x + 50, pos.y - 125);
-    Point upperRight = NewPos(pos.x - 50, pos.y - 125);
-    Point lowerLeft = NewPos(pos.x + 50, pos.y - 370);
-    Point lowerRight = NewPos(pos.x - 50, pos.y - 370);
-    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
-    drawQuad(quadSize, DBROWN);
-}
 
 void Ground(Point pos)
 {
@@ -783,32 +768,70 @@ void Ground(Point pos)
     drawQuadGradient(quadSize, newQuadColors(GRASSBOTTOM, GRASSBOTTOM, GREEN, GREEN));
 }
 
+void CreateTree(Point pos)
+{
+    // Commonality variable
+    float radius = 25;
+    float lines = 100;
 
-void Pickets(Point pos) {
-    Point upperLeft = NewPos(pos.x + 30, pos.y + 100);
-    Point upperRight = NewPos(pos.x - 30, pos.y + 100);
-    Point lowerLeft = NewPos(pos.x + 30, pos.y - 100);
-    Point lowerRight = NewPos(pos.x - 30, pos.y - 100);
+
+
+
+    //Draws the main trunk
+    Point upperLeft = NewPos(pos.x + 15, pos.y - 200);
+    Point upperRight = NewPos(pos.x - 15, pos.y - 200);
+    Point lowerLeft = NewPos(pos.x + 15, pos.y - 300);
+    Point lowerRight = NewPos(pos.x - 15, pos.y - 300);
+
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
-    drawQuad(quadSize, BROWN);
-
-    Point top = NewPos(pos.x + 0, pos.y + 120);
-    Point bottomRight = NewPos(pos.x - 30, pos.y + 100);
-    Point bottomLeft = NewPos(pos.x + 30, pos.y + 100);
+    drawQuadGradient(quadSize, newQuadColors(WalnutB, WalnutB, DBROWN, DBROWN));
+     // Position Child Shapes
+    Point leftCirclePos = NewPos(pos.x - 25, pos.y - 175);
+    Point rightCirclePos = NewPos(pos.x + 25, pos.y - 175);
+    Point topCirclePos = NewPos(pos.x, pos.y - 150);
+    Point bottomCirclePos = NewPos(pos.x, pos.y - 185);
+     // Draw Shapes
+    drawBasicShape(leftCirclePos, radius, lines, DGREEN);
+    drawBasicShape(rightCirclePos, radius, lines, DGREEN);
+    drawBasicShape(topCirclePos, radius, lines, DGREEN);
+    drawBasicShape(bottomCirclePos, radius, lines, DGREEN);
+}
+void Pickets(Point pos) {
+    Point upperLeft = NewPos(pos.x + 10, pos.y + 35);
+    Point upperRight = NewPos(pos.x - 10, pos.y + 35);
+    Point lowerLeft = NewPos(pos.x + 10, pos.y - 35);
+    Point lowerRight = NewPos(pos.x - 10, pos.y - 35);
+    QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
+    QuadColors picketGrad = newQuadColors(FENCE_WOOD, FENCE_WOOD, FENCE_HIGHLIGHT, FENCE_HIGHLIGHT);
+    drawQuadGradient(quadSize, picketGrad);
+    Point top = NewPos(pos.x + 0, pos.y + 40);
+    Point bottomRight = NewPos(pos.x - 10, pos.y + 30);
+    Point bottomLeft = NewPos(pos.x + 10, pos.y + 30);
     TriSize triSize = newTriSize(top, bottomRight, bottomLeft);
-    drawTriangle(triSize, WHITE);
+
+    drawTriangle(triSize, FENCE_HIGHLIGHT);
+
+
+
+
 }
 void Fence(Point pos) {
 
-    Point upperLeft = NewPos(pos.x + screenWidth, pos.y + 20);
-    Point upperRight = NewPos(pos.x - screenWidth, pos.y + 20);
-    Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 30);
-    Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 30);
+    Point upperLeft = NewPos(pos.x + screenWidth, pos.y + 5);
+    Point upperRight = NewPos(pos.x - screenWidth, pos.y + 5);
+    Point lowerLeft = NewPos(pos.x + screenWidth, pos.y - 10);
+    Point lowerRight = NewPos(pos.x - screenWidth, pos.y - 10);
 
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
-    drawQuad(quadSize, BROWN);
+
+    drawQuad(quadSize, FENCE_RAIL);
+
+
+
+
 };
+
 
 // Booth and Path Drawings
 void drawBooth(Point pos) {
@@ -928,7 +951,9 @@ struct FerrisWheel {
         radius(_r),
         numCars(_cars),
         color(_c),
-        rotation(0.0f) {}
+        rotation(0.0f)
+    {
+    }
 
     void rotate(float speed) {
         rotation += speed;
@@ -998,6 +1023,10 @@ void drawFerris(FerrisWheel& fw) {
     Color shineBlue = NewColor(0.2f, 0.6f, 1.0f);
     Color darkBlue = NewColor(0.0f, 0.1f, 0.5f);
 
+    drawHollowCenterGradient(fw.center, fw.radius, 6.0f, shineBlue, darkBlue);
+    drawHollowCenterGradient(fw.center, fw.radius * 0.94f, 4.0f, shineBlue, darkBlue);
+
+    // Spokes and Gondolas
     drawHollowCenterGradient(fw.center, fw.radius, 6.0f, shineBlue, darkBlue);
     drawHollowCenterGradient(fw.center, fw.radius * 0.94f, 4.0f, shineBlue, darkBlue);
 
@@ -1087,15 +1116,34 @@ void display() {
     // Create Ground
     Ground(NewPos(0, -520));
 
+    // Create Tree
+   // CreateTree(NewPos(-850, -20));
+
+    // Create Trees
+   // CreateTree(NewPos(750, -25));
     // Create Fence and Pickets
-    Fence(NewPos(4, -250));
+
+
+
+    Fence(NewPos(4, -295));
 
     int picketSpread = 125;
     int picketAmount = 20;
     for (int i = 0; i < picketAmount; i++)
     {
-        Pickets(NewPos(-1200 + (picketSpread * i), -250));
+        Pickets(NewPos(-1200 + (picketSpread * i), -300));
     }
+
+    for(int i = 0; i < treeAmount; i++) {
+    CreateTree(NewPos( (treeXOffsets[i]), treeYOffsets[i]));
+}
+
+    //Ferris Wheel
+    drawFerrisBase(ferris.center, 450, BLACK);
+
+    drawFerris(ferris);
+
+
 
     //Ferris Wheel
     drawFerrisBase(ferris.center, 450, BLACK);
@@ -1118,13 +1166,12 @@ void display() {
     Color rightBulbColors[3] = { YELLOW, BLUE, RED };
     drawLightString(NewPos(-650, -20), NewPos(-400, -20), 3, rightBulbColors);
 
-    // Create Trees
-    CreateTree(NewPos(750, 35));
 
     // Booth and Path
     drawBooth(NewPos(1000, -300));
     drawPath(NewPos(0, -200));
-    
+
+
     glutSwapBuffers();
 }
 
@@ -1143,6 +1190,18 @@ void init() {
     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    float screenWidthTotal = 2.0f * screenWidth; // 2560 total width
+    float slotWidth = screenWidthTotal / treeAmount;
+    for(int i = 0; i < treeAmount; i++) {
+    float zonestart = -screenWidth + (i * slotWidth);
+
+
+    float lockedY = -30.0f + (randf() * -40.0f);
+
+    float randomX = zonestart + (randf() * slotWidth);
+    treeXOffsets.push_back(randomX);
+    treeYOffsets.push_back(lockedY);
+}
 }
 
 // Will run code every 60 FPS
@@ -1156,11 +1215,11 @@ void update() {
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case '+':
-            if (speedMultiplier < 10) 
+            if (speedMultiplier < 10)
             {
                 speedMultiplier += 1;
             }
-            
+
             break;
         case '-':
             if (speedMultiplier > 1)
