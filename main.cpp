@@ -858,10 +858,13 @@ public:
         InitializeBulbs();
     }
 
-    void Update() {
+    void Update(bool isPaused) {
         glPushMatrix();
-
-        Animate();
+		
+ 		if (!isPaused){
+     		Animate(); //only animated when NOT paused
+ 		}
+		
         DrawWire();
         DrawBulbs();
 
@@ -1363,9 +1366,9 @@ void display() {
 	poleLAST.Draw();
 
 	// Right set of lights
-	lights3.Update();
-	lights4.Update();
-	lightsLAST.Update();
+	lights3.Update(pause);
+	lights4.Update(pause);
+	lightsLAST.Update(pause);
 
 	// Left set of poles
 	poleFIRST.Draw();
@@ -1374,9 +1377,9 @@ void display() {
 	pole3.Draw();
 
 	// Left set of lights
-	lightsFIRST.Update();
-	lights1.Update();
-	lights2.Update();
+	lightsFIRST.Update(pause);
+	lights1.Update(pause);
+	lights2.Update(pause);
 
     // Booth and Path
     drawBooth(NewPos(800, -375));
@@ -1393,9 +1396,9 @@ void display() {
 	poleFRONT4.Draw();
 
 	// FRONT set of lights
-	lightsFRONT1.Update();
-	lightsFRONT2.Update();
-	lightsFRONT3.Update();
+	lightsFRONT1.Update(pause);
+	lightsFRONT2.Update(pause);
+	lightsFRONT3.Update(pause);
 
     glutSwapBuffers();
 }
