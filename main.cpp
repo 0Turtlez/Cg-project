@@ -62,6 +62,16 @@ struct TriSize {
     Point bottomLeft;
 };
 
+struct Bulb	 //for the lights
+{
+    Point pos;
+    Color baseColor;
+
+    float brightness;   // 0 → 1
+    float speed;        // animation speed
+    bool increasing;    // direction of glow
+};
+
 // -------- Universally Defined Colors ------------- //
 
 // Other Colors
@@ -755,6 +765,143 @@ public:
 };
 
 
+//======================================= LIGHTSTRING ====================================//
+class LightString {
+private:
+    Point left;
+    Point right;
+
+    int numBulbs;
+    float sagAmount;
+
+    std::vector<Bulb> bulbs;
+
+    void InitializeBulbs() {
+        Color palette[] = { YELLOW, RED, BLUE };
+
+        for (int i = 0; i < numBulbs; i++) {
+            float t = (float)(i + 1) / (numBulbs + 1);
+
+            float x = left.x + t * (right.x - left.x);
+            float y = left.y + t * (right.y - left.y) - (sagAmount * sinf(PI * t));
+
+            Bulb b;
+            b.pos = NewPos(x, y);
+            b.baseColor = palette[i % 3];
+
+            b.brightness = 0.0f;
+            b.speed = 0.01f + (randf() * 0.03f); // random flicker speed
+            b.increasing = (randf() > 0.5f);
+
+            bulbs.push_back(b);
+        }
+    }
+
+    void Animate() {
+        for (auto& b : bulbs) {
+            if (nightMode) {
+                if (b.increasing)
+                    b.brightness += b.speed;
+                else
+                    b.brightness -= b.speed;
+
+                if (b.brightness >= 1.0f) {
+                    b.brightness = 1.0f;
+                    b.increasing = false;
+                }
+                else if (b.brightness <= 0.0f) {
+                    b.brightness = 0.0f;
+                    b.increasing = true;
+                }
+            }
+            else {
+                //lights visible but dimmer during day
+                float target = 0.5f;  // dim glow
+                b.brightness += (target - b.brightness) * 0.05f;
+            }
+        }
+    }
+
+    void DrawWire() {
+        glBegin(GL_LINE_STRIP);
+        glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+
+        const int segments = 40;
+        for (int i = 0; i <= segments; i++) {
+            float t = (float)i / segments;
+
+            float x = left.x + t * (right.x - left.x);
+            float y = left.y + t * (right.y - left.y) - (sagAmount * sinf(PI * t));
+
+            glVertex2f(x, y);
+        }
+
+        glEnd();
+    }
+
+    void DrawBulbs() {
+        for (auto& b : bulbs) {
+            Color c = b.baseColor;
+            c.a = b.brightness; // glow effect
+
+            drawBasicShape(b.pos, 8.0f, 12, c); // smaller bulbs
+        }
+    }   
+
+public:
+    LightString(Point l, Point r, int count, float sag = 30.0f) {
+        left = l;
+        right = r;
+        numBulbs = count;
+        sagAmount = sag;
+
+        InitializeBulbs();
+    }
+
+    void Update() {
+        glPushMatrix();
+
+        Animate();
+        DrawWire();
+        DrawBulbs();
+
+        glPopMatrix();
+    }
+};
+
+
+//======================================== LIGHTPOLE ==================================================//
+class LightPole {
+private:
+    Point base;
+    float height;
+    float width;
+    Color color;
+
+public:
+    LightPole(Point b, float h, float w, Color c = WHITE) {
+        base = b;
+        height = h;
+        width = w;
+        color = c;
+    }
+
+    Point GetTop() {
+        return NewPos(base.x, base.y + height);
+    }
+
+    void Draw() {
+        QuadSize post = newQuadSize(
+            NewPos(base.x - width / 2, base.y),
+            NewPos(base.x + width / 2, base.y),
+            NewPos(base.x - width / 2, base.y + height),
+            NewPos(base.x + width / 2, base.y + height)
+        );
+
+        drawQuad(post, color);
+    }
+};
+
 
 void Ground(Point pos)
 {
@@ -937,17 +1084,33 @@ void drawLightString(Point leftPostTop, Point rightPostTop, int numBulbs, Color 
     glEnd();
 
     // Place the colored bulbs
-    float bulbRadius = 22.0f;
+    static float time = 0;
+    time += 0.05f;
+
     for (int i = 0; i < numBulbs; i++) {
-        float t = (float)(i + 1) / (numBulbs + 1);  // space evenly
+        float t = (float)(i + 1) / (numBulbs + 1);
+
         float x = leftPostTop.x + t * (rightPostTop.x - leftPostTop.x);
         float sag = 30.0f * sinf(PI * t);
         float y = leftPostTop.y - sag;
 
-        Color bulbColor = bulbColors[i % 3];  // cycle through yellow/red/blue
-        drawBasicShape(NewPos(x, y), bulbRadius, 12, bulbColor);
+        Color bulbColor = bulbColors[i % 3];
+
+        float brightness;
+
+        if (nightMode) {
+            brightness = (sinf(time + i) + 1.0f) / 2.0f;  // wave glow
+        }
+        else {
+            brightness = 0.0f;
+        }
+
+        bulbColor.a = brightness;
+
+        drawBasicShape(NewPos(x, y), 8.0f, 12, bulbColor);
     }
 }
+
 
 // ------ Ferris Wheel ------- //
 struct FerrisWheel {
@@ -1113,6 +1276,36 @@ ParticleGroup<StarParticle> stars(NewPos(0, 0), 1000, 0, 0.01f);
 Sun sun(NewPos(1000, 500),100, 0.01f);
 Moon moon(NewPos(-1000, 500), 50, 0.01f);
 
+// Poles
+LightPole poleFIRST(NewPos(-1150 + randf() * 40, -425), 200, 15);
+LightPole pole1(NewPos(-950 + randf() * 40, -400), 200, 15);
+LightPole pole2(NewPos(-650 + randf() * 40, -425), 200, 15);
+LightPole pole3(NewPos(-400 + randf() * 40, -400), 200, 15);
+
+LightPole pole4(NewPos(600 + randf() * 40, -375), 200, 15);
+LightPole pole5(NewPos(800 + randf() * 40, -400), 200, 15);
+LightPole pole6(NewPos(1000 + randf() * 40, -375), 200, 15);
+LightPole poleLAST(NewPos(1200 + randf() * 40, -400), 200, 15);
+
+LightPole poleFRONT1(NewPos(-600 + randf() * 40, -700), 200, 15);
+LightPole poleFRONT2(NewPos(-300 + randf() * 40, -675), 200, 15);
+LightPole poleFRONT3(NewPos(0 + randf() * 40, -700), 200, 15);
+LightPole poleFRONT4(NewPos(300 + randf() * 40, -675), 200, 15);
+
+
+// Light strings
+LightString lightsFIRST(poleFIRST.GetTop(), pole1.GetTop(), 15);
+LightString lights1(pole1.GetTop(), pole2.GetTop(), 15);
+LightString lights2(pole2.GetTop(), pole3.GetTop(), 15);
+
+LightString lights3(pole4.GetTop(), pole5.GetTop(), 12, 20);
+LightString lights4(pole5.GetTop(), pole6.GetTop(), 12, 20);
+LightString lightsLAST(pole6.GetTop(), poleLAST.GetTop(), 12, 20);
+
+LightString lightsFRONT1(poleFRONT1.GetTop(), poleFRONT2.GetTop(), 15);
+LightString lightsFRONT2(poleFRONT2.GetTop(), poleFRONT3.GetTop(), 15);
+LightString lightsFRONT3(poleFRONT3.GetTop(), poleFRONT4.GetTop(), 15);
+
 // ----------------------------------- Display Function --> Represent Draw Order ------------------------------------ //
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -1162,28 +1355,47 @@ void display() {
     // Create Tree
     //CreateTree(NewPos(-850, 50));
 
-    // Light strings and poles:
-    drawPost(NewPos(-950, -420), 400, 30); // Pole 1
-    drawPost(NewPos(-650, -420), 400, 30); // Pole 2
-    drawPost(NewPos(-400, -420), 400, 30); // Pole 3
+	// Light strings and poles:
+	// Right set of poles:
+	pole4.Draw();
+	pole5.Draw();
+	pole6.Draw();
+	poleLAST.Draw();
 
-    // First light string
-    Color leftBulbColors[3] = { YELLOW, RED, BLUE };
-    drawLightString(NewPos(-950, -20), NewPos(-650, -20), 3, leftBulbColors);
+	// Right set of lights
+	lights3.Update();
+	lights4.Update();
+	lightsLAST.Update();
 
-    // Second light string
-    Color rightBulbColors[3] = { YELLOW, BLUE, RED };
-    drawLightString(NewPos(-650, -20), NewPos(-400, -20), 3, rightBulbColors);
+	// Left set of poles
+	poleFIRST.Draw();
+	pole1.Draw();
+	pole2.Draw();
+	pole3.Draw();
 
+	// Left set of lights
+	lightsFIRST.Update();
+	lights1.Update();
+	lights2.Update();
 
     // Booth and Path
     drawBooth(NewPos(800, -375));
     drawPath(NewPos(0, -200));
-
+	
     for (int i = 0; i < treeAmount; i++) {
        CreateTree(NewPos((treeXOffsets[(treeXOffsets.size()-1) - i]), treeYOffsets[i] - 250));
     }
 
+	// FRONT set of poles
+	poleFRONT1.Draw();
+	poleFRONT2.Draw();
+	poleFRONT3.Draw();
+	poleFRONT4.Draw();
+
+	// FRONT set of lights
+	lightsFRONT1.Update();
+	lightsFRONT2.Update();
+	lightsFRONT3.Update();
 
     glutSwapBuffers();
 }
