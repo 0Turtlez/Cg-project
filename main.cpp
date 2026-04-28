@@ -839,37 +839,52 @@ void drawBooth(Point pos) {
     // Booth base (rectangle)
     glColor3f(0.8, 0.2, 0.2); // red
     glBegin(GL_POLYGON);
-    glVertex2f((-0.9 * screenWidth / 2) + pos.x, (-0.3 * screenHeight) + pos.y);
-    glVertex2f((-0.6 * screenWidth / 2) + pos.x, (-0.3 * screenHeight) + pos.y);
-    glVertex2f((-0.6 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.9 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.5 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
+    glVertex2f((-0.25 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
+    glVertex2f((-0.25 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.5 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
     glEnd();
 
-    // Roof (triangle)
+    // Roof (trapezoid)
     glColor3f(0.5, 0.1, 0.1);
-    glBegin(GL_TRIANGLES);
-    glVertex2f((-0.95 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.55 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
-    glVertex2f((-0.75 * screenWidth / 2) + pos.x, (0.2 * screenHeight) + pos.y);
+    glBegin(GL_POLYGON);
+    glVertex2f((-0.5 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
+    glVertex2f((-0.45 * screenWidth / 2) + pos.x, (0.075 * screenHeight) + pos.y);
+    glVertex2f((-0.3 * screenWidth / 2) + pos.x, (0.075 * screenHeight) + pos.y);
+    glVertex2f((-0.25 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
     glEnd();
 
     // Window
     glColor3f(0.9, 0.9, 1.0); // light blue
     glBegin(GL_POLYGON);
-    glVertex2f((-0.82 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
-    glVertex2f((-0.68 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
-    glVertex2f((-0.68 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.82 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.475 * screenWidth / 2) + pos.x, (-0.1 * screenHeight) + pos.y);
+    glVertex2f((-0.275 * screenWidth / 2) + pos.x, (-0.1 * screenHeight) + pos.y);
+    glVertex2f((-0.275 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
+    glVertex2f((-0.475 * screenWidth / 2) + pos.x, (-0.05 * screenHeight) + pos.y);
     glEnd();
 
     // Sign (Ticket)
     glColor3f(1.0, 1.0, 0.0); // yellow
     glBegin(GL_POLYGON);
-    glVertex2f((-0.85 * screenWidth / 2) + pos.x, (0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.65 * screenWidth / 2) + pos.x, (0.05 * screenHeight) + pos.y);
-    glVertex2f((-0.65 * screenWidth / 2) + pos.x, (0.12 * screenHeight) + pos.y);
-    glVertex2f((-0.85 * screenWidth / 2) + pos.x, (0.12 * screenHeight) + pos.y);
+    glVertex2f((-0.45 * screenWidth / 2) + pos.x, (0.02 * screenHeight) + pos.y);
+    glVertex2f((-0.3 * screenWidth / 2) + pos.x, (0.02 * screenHeight) + pos.y);
+    glVertex2f((-0.3 * screenWidth / 2) + pos.x, (0.06 * screenHeight) + pos.y);
+    glVertex2f((-0.45 * screenWidth / 2) + pos.x, (0.06 * screenHeight) + pos.y);
     glEnd();
+
+    // Draw "TICKETS" text in the middle of the sign
+    glColor3f(0.0, 0.0, 0.0); // black text
+
+    float textX = (-0.44 * screenWidth / 2) + pos.x; // slightly adjusted for centering
+    float textY = (0.0325 * screenHeight) + pos.y;
+
+    glRasterPos2f(textX, textY);
+
+    const char* text = "TICKETS";
+    for (int i = 0; text[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, text[i]);
+    }
+
 }
 
 void drawPath(Point pos) {
@@ -1143,8 +1158,6 @@ void display() {
 
     drawFerris(ferris);
 
-
-
     //Ferris Wheel
     drawFerrisBase(ferris.center, 450, BLACK);
 
@@ -1168,7 +1181,7 @@ void display() {
 
 
     // Booth and Path
-    drawBooth(NewPos(1000, -300));
+    drawBooth(NewPos(800, -375));
     drawPath(NewPos(0, -200));
 
 
