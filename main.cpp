@@ -1161,6 +1161,16 @@ void display() {
 
 
 
+
+    //Ferris Wheel
+    drawFerrisBase(ferris.center, 450, BLACK);
+
+    drawFerris(ferris);
+
+    // Create Tree
+    CreateTree(NewPos(-850, 50));
+
+
     // Light strings and poles:
     drawPost(NewPos(-950, -420), 400, 30); // Pole 1
     drawPost(NewPos(-650, -420), 400, 30); // Pole 2
@@ -1178,6 +1188,7 @@ void display() {
     // Booth and Path
     drawBooth(NewPos(1000, -300));
     drawPath(NewPos(0, -200));
+
 
     glutSwapBuffers();
 }
