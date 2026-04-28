@@ -824,12 +824,7 @@ void Fence(Point pos) {
 
     QuadSize quadSize = newQuadSize(lowerLeft, lowerRight, upperLeft, upperRight);
 
-
     drawQuad(quadSize, FENCE_RAIL);
-
-
-
-
 };
 
 
@@ -839,8 +834,8 @@ void drawBooth(Point pos) {
     // Booth base (rectangle)
     glColor3f(0.8, 0.2, 0.2); // red
     glBegin(GL_POLYGON);
-    glVertex2f((-0.5 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
-    glVertex2f((-0.25 * screenWidth / 2) + pos.x, (-0.15 * screenHeight) + pos.y);
+    glVertex2f((-0.5 * screenWidth / 2) + pos.x, (-0.157 * screenHeight) + pos.y);
+    glVertex2f((-0.25 * screenWidth / 2) + pos.x, (-0.157 * screenHeight) + pos.y);
     glVertex2f((-0.25 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
     glVertex2f((-0.5 * screenWidth / 2) + pos.x, (0.0 * screenHeight) + pos.y);
     glEnd();
@@ -891,12 +886,13 @@ void drawPath(Point pos) {
     // Main path
     glColor3f(0.6, 0.6, 0.6); // gray
     glBegin(GL_POLYGON);
-    glVertex2f((-1.0 * screenWidth) + pos.x, (-0.6 * screenHeight) + pos.y);
-    glVertex2f((1.0 * screenWidth) + pos.x, (-0.6 * screenHeight) + pos.y);
+    glVertex2f((-1.0 * screenWidth) + pos.x, (-0.5 * screenHeight) + pos.y);
+    glVertex2f((1.0 * screenWidth) + pos.x, (-0.5 * screenHeight) + pos.y);
     glVertex2f((1.0 * screenWidth) + pos.x, (-0.4 * screenHeight) + pos.y);
     glVertex2f((-1.0 * screenWidth) + pos.x, (-0.4 * screenHeight) + pos.y);
     glEnd();
 
+    /*
     // Path lines (decorative stripes)
     glColor3f(1.0, 1.0, 1.0); // white
 
@@ -907,7 +903,7 @@ void drawPath(Point pos) {
         glVertex2f(((x + 0.15) * screenWidth) + pos.x, (-0.48 * screenHeight) + pos.y);
         glVertex2f((x * screenWidth) + pos.x, (-0.48 * screenHeight) + pos.y);
         glEnd();
-    }
+    }*/
 }
 
 // Draw a single vertical post/pole
@@ -1142,11 +1138,11 @@ void display() {
 
     Fence(NewPos(4, -295));
 
-    int picketSpread = 125;
-    int picketAmount = 20;
+    int picketSpread = 50;
+    int picketAmount = 50;
     for (int i = 0; i < picketAmount; i++)
     {
-        Pickets(NewPos(-1200 + (picketSpread * i), -300));
+        Pickets(NewPos(-1250 + (picketSpread * i), -300));
     }
 
     for(int i = 0; i < treeAmount; i++) {
@@ -1203,6 +1199,7 @@ void init() {
     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+
     float screenWidthTotal = 2.0f * screenWidth; // 2560 total width
     float slotWidth = screenWidthTotal / treeAmount;
     for(int i = 0; i < treeAmount; i++) {
