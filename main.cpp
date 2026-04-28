@@ -22,7 +22,7 @@ bool nightMode = false;
 int speedMultiplier = 1;
 std::vector<float> treeYOffsets;
 std::vector<float> treeXOffsets;
-  int treeAmount = 8;
+  int treeAmount = 10;
     int treeSpread = 112;
 
 // -------- Structs Defined ----------- //
@@ -1146,8 +1146,8 @@ void display() {
     }
 
     for(int i = 0; i < treeAmount; i++) {
-    CreateTree(NewPos( (treeXOffsets[i]), treeYOffsets[i]));
-}
+        CreateTree(NewPos( (treeXOffsets[i]), treeYOffsets[i] - 25));
+    }
 
     //Ferris Wheel
     drawFerrisBase(ferris.center, 450, BLACK);
@@ -1160,7 +1160,7 @@ void display() {
     drawFerris(ferris);
 
     // Create Tree
-    CreateTree(NewPos(-850, 50));
+    //CreateTree(NewPos(-850, 50));
 
     // Light strings and poles:
     drawPost(NewPos(-950, -420), 400, 30); // Pole 1
@@ -1179,6 +1179,10 @@ void display() {
     // Booth and Path
     drawBooth(NewPos(800, -375));
     drawPath(NewPos(0, -200));
+
+    for (int i = 0; i < treeAmount; i++) {
+       CreateTree(NewPos((treeXOffsets[(treeXOffsets.size()-1) - i]), treeYOffsets[i] - 250));
+    }
 
 
     glutSwapBuffers();
@@ -1206,7 +1210,7 @@ void init() {
     float zonestart = -screenWidth + (i * slotWidth);
 
 
-    float lockedY = -30.0f + (randf() * -40.0f);
+    float lockedY = -30.0f + (randf() * -60.0f);
 
     float randomX = zonestart + (randf() * slotWidth);
     treeXOffsets.push_back(randomX);
