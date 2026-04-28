@@ -1381,6 +1381,10 @@ void display() {
     // Booth and Path
     drawBooth(NewPos(800, -375));
     drawPath(NewPos(0, -200));
+	
+    for (int i = 0; i < treeAmount; i++) {
+       CreateTree(NewPos((treeXOffsets[(treeXOffsets.size()-1) - i]), treeYOffsets[i] - 250));
+    }
 
 	// FRONT set of poles
 	poleFRONT1.Draw();
@@ -1392,11 +1396,6 @@ void display() {
 	lightsFRONT1.Update();
 	lightsFRONT2.Update();
 	lightsFRONT3.Update();
-	
-    for (int i = 0; i < treeAmount; i++) {
-       CreateTree(NewPos((treeXOffsets[(treeXOffsets.size()-1) - i]), treeYOffsets[i] - 250));
-    }
-
 
     glutSwapBuffers();
 }
